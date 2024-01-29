@@ -1,0 +1,57 @@
+{
+    "manifest_version": 3,
+    "name": "demobug",
+    "version": "1.0.0",
+    "description": "简单的Chrome扩展demo",
+    "icons": {
+        "16": "img/icon2.png",
+        "48": "img/icon2.png",
+        "128": "img/icon2.png"
+    },
+    "options_page": "options.html",
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "action": {
+        "default_icon": {
+            "24": "img/icon2.png"
+        },
+        "sizes": "24x24",
+        "default_title": "这是一个示例Chrome插件",
+        "default_popup": "popup.html"
+    },
+    "devtools_page": "devtools.html",
+    "permissions": [
+        "activeTab",
+        "tabs",
+        "storage",
+        "webRequest"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "http://*/*"
+            ],
+            "css": [
+                "css/bootstrap.css",
+                "css/content.css"
+            ],
+            "js": [
+                "js/base64.js",
+                "js/pako.js",
+                "js/cookie.js",
+                "reactive/index.js",
+                "js/jquery.js",
+                "components/index.js",
+                "components/login.js",
+                "components/maskLayer.js",
+                "components/loading.js",
+                "components/closeDialog.js",
+                "components/pushButton.js",
+                "content.js"
+            ],
+            "run_at": "document_idle"
+        }
+    ]
+}

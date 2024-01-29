@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./css/content.css">
+    <link rel="stylesheet" href="./css/bootstrap.css">
+    <script src="js/jquery.js"></script>
+</head>
+
+<body>
+    <!-- <div class="login-box">
+        <div class="login-title">
+            <button class="btn el-button">
+                点击
+                <div class="el-loading-mask el-loading-mask-inset">
+                    <svg class="circular" viewBox="0 0 50 50"><circle class="path" cx="25" cy="25" r="20" fill="none"></circle></svg>
+                </div>
+            </button>
+            <button class="btn btn-link btn-sm login-close-btn">x</button>
+        </div>
+        <form id="login-form-options" class="el-form login-box-form form-inline box_content" action="/">
+            <div class="el-form-item-g"></div>
+            <div class="form-group el-form-item">
+                <div class="el-form-item_content">
+                    <input required type="text" class="form-control el-input w-100" id="exampleInputName2"
+                        name="account" placeholder="请输入账号">
+                </div>
+            </div>
+            <div class="form-group el-form-item">
+                <div class="el-form-item_content">
+                    <input required type="password" class="form-control el-input w-100" id="exampleInputName2"
+                        name="password" placeholder="请输入密码">
+                </div>
+            </div>
+            <div class="form-group el-form-item">
+                <div class="el-form-item_content">
+                    <input required type="password" class="form-control el-input form-validate-yzm-inp box_content"
+                        name="verificationCode" id="exampleInputName2" placeholder="请输入验证码">
+                    <img src="./img/1.png" alt="失败" class="form-validate-yzm" />
+                </div>
+            </div>
+            <div class="form-group el-form-item">
+                <div class="el-form-item_content">
+                    <button class="btn btn-primary w-100" id="login-btn" type="submit">登录</button>
+                </div>
+            </div>
+        </form>
+    </div> -->
+    <div class="el-dialog-close">
+        <div class="el-dialog-close-content">
+            <h4 style="font-weight: 600;">当前数据是否要推送国抽？</h4>
+        </div>
+        <div class="el-dialog-close-btns btn-group">
+            <button class="btn">取消</button>
+            <button class="btn btn-primary">确认</button>
+        </div>
+    </div>
+</body>
+<script>
+
+    $('#login-btn').click((evt) => {
+        evt.preventDefault()
+        const formData = new FormData($('#login-form-options')[0])
+        if(!formData.get('account')){
+            return alert('账号不能为空')
+        }
+        if(!formData.get('password')){
+            return alert('密码不能为空')
+        }
+        if(!formData.get('verificationCode')){
+            return alert('验证码不能为空')
+        }
+    })
+
+</script>
+
+</html>
