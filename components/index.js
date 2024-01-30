@@ -167,3 +167,14 @@ function obsDOM(obsTreeStr, callback) {
         flag = false
     }
 }
+
+function nationalPumpPush() {
+    if (!trCurrentDataMps.has(currentId.value)) {
+        return pushStatusErrorTip.value = "数据获取异常，无法推送"
+    }
+    if (getLoginInfo().state !== 1) {
+        return loginAlterHandler()
+    }
+    alreadyPushedData.set(currentId.value, true)
+    console.log("成功", trCurrentDataMps.get(currentId.value), toValue(currentCYDNumber));
+}

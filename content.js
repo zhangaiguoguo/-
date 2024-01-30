@@ -152,14 +152,6 @@ function closeDislogHandle2(evt) {
         createCloseDialog()
 }
 
-function nationalPumpPush() {
-    if (!trCurrentDataMps.has(currentId.value)) {
-        return pushStatusErrorTip.value = "数据获取异常，无法推送"
-    }
-    alreadyPushedData.set(currentId.value, true)
-    console.log("成功", trCurrentDataMps.get(currentId.value), toValue(currentCYDNumber));
-}
-
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     console.log(request, "content");
     switch (request.type) {

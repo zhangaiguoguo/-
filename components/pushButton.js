@@ -30,9 +30,6 @@
             html.find('button').attr('disabled', loading.value)
             $(html).click(({ target }) => {
                 if ($(target).attr(buttonsRef[0]) !== void 0) {
-                    if (getLoginInfo().state !== 1) {
-                        return loginAlterHandler()
-                    }
                     nationalPumpPush();
                 } else if ($(target).attr(buttonsRef[1]) !== void 0) {
                     emits.update()
