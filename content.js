@@ -1,35 +1,65 @@
+const { alreadyPushedData, pushStatusLoading, pushStatusErrorTip, buttonsRef, obsTreeStr, obsDOMTrMps, obsDOMTrMps2, trCurrentDataMps, trMps, currentId, currentCYDNumber, currentFuncStatus, currentTaskMainRootEl, currentVerificationCode, currentLoginStatus, currentLoginStatusErrorTip, currentLoginStatusFlag, currentDataIsPushGC } = window.globalState;
 
 const loginAlterHandler = createDOM($(document.body), function (props) {
-    const loginHtml = findComponentTemplate('login')({
+    currentLoginStatus.value = props.destroy
+    return findComponentTemplate('login')({
         ...getLoginInfo(),
+    }, {
+        destroy: props.destroy
     })
-    const html = $(findComponentTemplate('maskLayer')({}, {
-        default: () => loginHtml
-    }))
-    html.find("button#login-btn").click(function (evt) {
-        let flag = true
-        const formData = new FormData(html.find("form#login-form-options")[0])
-        for (let w of formData) {
-            if (!w[1]) {
-                flag = false;
-                break
-            }
-        }
-        flag && evt.preventDefault()
-        if (flag) {
-            console.log("发送");
-            props.destroy()
-            nationalPumpPush();
-        }
-        setLoginInfo(formData.get('account'), formData.get('password'))
-    })
-    html.find("a.login-close-btn").click(() => {
-        props.destroy()
-    })
-    return html
 })
 
-const { alreadyPushedData, pushStatusLoading, pushStatusErrorTip, buttonsRef, obsTreeStr, obsDOMTrMps, obsDOMTrMps2, trCurrentDataMps, trMps, currentId, currentCYDNumber, currentFuncStatus, currentTaskMainRootEl } = window.globalState;
+const createUpLoadFileNode = createDOM($(document.body), function (props) {
+    return findComponentTemplate('elUpdateFile')({
+    }, {}, {
+        destroy: props.destroy,
+        async submit(fileList) {
+            const fileUrls = []
+            pushStatusLoading.value = true
+            try {
+                for await (let file of fileList) {
+                    const reader = new FileReader()
+                    reader.readAsDataURL(file)
+                    const result = await new Promise((resolve, reject) => {
+                        reader.onload = ({ target: { result } }) => {
+                            resolve(result)
+                        }
+                    })
+                    fileUrls.push(result)
+                }
+            } catch (er) {
+
+            }
+            pushStatusLoading.value = false
+            pushCurrentData(1, {
+                files: fileUrls
+            })
+            props.destroy()
+            props.refresh()
+        }
+    })
+})
+
+const tastConclusionMaskLayer = createDOM($(document.body), function (props) {
+    return findComponentTemplate('maskLayer')({}, {
+        default: () => {
+            return findComponentTemplate("closeDialog")({}, {
+                default: () => {
+                    return `<h4 style="font-weight:600;">是否要12小时现时报？</h4>`
+                }
+            }, {
+                cancel() {
+                    pushCurrentData()
+                },
+                confirm() {
+                    createUpLoadFileNode()
+                },
+                destroy: props.destroy
+            })
+        }
+    })
+})
+
 
 obsDOM(obsTreeStr, (v) => {
     v.children().each((i, v) => {
@@ -77,6 +107,9 @@ function createButtonHook2() {
                     pushStatusErrorTip.value = null
                     sendCurrentMessage()
                 },
+                login: () => {
+                    loginAlterHandler()
+                },
                 setScoped(v) {
                     scoped = v
                     return v
@@ -114,7 +147,7 @@ function createButtonTSGC(root) {
     }
 }
 
-function sendCurrentMessage(){
+function sendCurrentMessage() {
     pushStatusLoading.value = true
     chrome.runtime.sendMessage({ type: "TABLECLICK", id: currentId.value });
 }
@@ -127,19 +160,21 @@ function closeDislogHandle(root) {
 }
 
 const createCloseDialog = createDOM($(document.body), function (props) {
-    const closeDialog = $(findComponentTemplate('closeDialog')({ destroy: props.destroy }, {
+    const closeDialog = $(findComponentTemplate('closeDialog')({}, {
         default: () => $(`<h4 style="font-weight:600;">前数据可推送国抽，是否继续 ？</h4>`)
     }, {
         cancel() {
             commontjs()
+            if (toValue(currentLoginStatusFlag))
+                pushCurrentData(0)
         },
         confirm() {
             nationalPumpPush()
             commontjs()
-        }
+        },
+        destroy: props.destroy
     }))
     function commontjs() {
-        currentId.value = null
     }
     const html = $(findComponentTemplate('maskLayer')({}, {
         default: () => closeDialog
@@ -154,15 +189,70 @@ function closeDislogHandle2(evt) {
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     console.log(request, "content");
+    const message = request.message
     switch (request.type) {
         case 'RESPONSECOMPLETE':
             trCurrentDataMps.set(currentId.value, request.message)
+            getLoginStatus()
+            break
         case 'RESPONSECOMPLETEERROR':
-            pushStatusLoading.value = false
             if (request.type === "RESPONSECOMPLETEERROR") {
                 pushStatusErrorTip.value = request.message
                 trCurrentDataMps.delete(currentId.value)
             }
             break
+        case 'LOGINSTATUSRESPONSE':
+            pushStatusLoading.value = false
+            const FLAGKEY = "flag"
+            if (message.code === 200) {
+                currentLoginStatusFlag.value = message.data[FLAGKEY]
+                if (!message.data[FLAGKEY]) {
+                    currentVerificationCode.value = message.data.data
+                    loginAlterHandler()
+                } else {
+                    if (toValue(currentDataIsPushGC)) {
+                        nationalPumpPush()
+                    }
+                }
+            } else {
+                pushStatusErrorTip.value = "请求异常，重新操作一下"
+            }
+            break
+        case "PUSHSTATUSRESPONSE":
+            pushStatusLoading.value = false
+            if (message.code === 200) {
+                if (message.data.flag) {
+                    return
+                }
+            } else {
+                pushStatusErrorTip.value = "请求异常，重新操作一下"
+            }
+            alreadyPushedData.delete(message.id)
+            break
+        case "LOGINRESPONSE":
+            pushStatusLoading.value = false
+            currentLoginStatus.value?.()
+            if (message.code === 200) {
+                currentLoginStatusFlag.value = message.data.flag
+                if (message.data.flag) {
+                    if (toValue(currentDataIsPushGC)) {
+                        nationalPumpPush()
+                    }
+                } else {
+                    currentVerificationCode.value = message.data.data
+                    loginStatusError()
+                }
+            } else {
+                loginStatusError()
+                currentLoginStatusFlag.value = false
+            }
+            break
+
     }
 });
+
+function loginStatusError() {
+    currentLoginStatusErrorTip.value = "请求异常，重新操作一下"
+    removeLoginInfo()
+    loginAlterHandler()
+}

@@ -1,80 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <link rel="stylesheet" href="./css/content.css">
-    <link rel="stylesheet" href="./css/bootstrap.css">
+    <link rel="stylesheet" href="./css/content.css" />
+    <link rel="stylesheet" href="./css/bootstrap.css" />
     <script src="js/jquery.js"></script>
-</head>
+  </head>
 
-<body>
-    <!-- <div class="login-box">
-        <div class="login-title">
-            <button class="btn el-button">
-                点击
-                <div class="el-loading-mask el-loading-mask-inset">
-                    <svg class="circular" viewBox="0 0 50 50"><circle class="path" cx="25" cy="25" r="20" fill="none"></circle></svg>
+  <body>
+    <div class="el-mask-layer-hij">
+      <div class="el-mask-layer-content">
+        <div class="el-update-gij">
+          <div class="el-update-header-gij">
+            <span>上传附件</span>
+            <button class="btn btn-link btn-primary el-update-close-gij">关闭弹窗</button>
+          </div>
+          <div class="el-update-content-gij">
+            <input type="file" id="el-update-content-input-gij" multiple draggable>
+            <button class="btn btn-primary" id="el-update-btn">上传附件</button>
+            <ul class="el-update-content-list-gij">
+              <li class="el-update-content-item-gij">
+                <div class="el-update-content-item-content-gij">
+                  <i class="el-icon-pij"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><path fill="currentColor" d="M832 384H576V128H192v768h640zm-26.496-64L640 154.496V320zM160 64h480l256 256v608a32 32 0 0 1-32 32H160a32 32 0 0 1-32-32V96a32 32 0 0 1 32-32m160 448h384v64H320zm0-192h160v64H320zm0 384h384v64H320z"></path></svg></i>
+                  <span class="name">1.png</span>
+                  <a href="javascript:;" class="btn-close">
+                    x
+                  </a>
                 </div>
-            </button>
-            <button class="btn btn-link btn-sm login-close-btn">x</button>
+              </li>
+            </ul>
+          </div>
         </div>
-        <form id="login-form-options" class="el-form login-box-form form-inline box_content" action="/">
-            <div class="el-form-item-g"></div>
-            <div class="form-group el-form-item">
-                <div class="el-form-item_content">
-                    <input required type="text" class="form-control el-input w-100" id="exampleInputName2"
-                        name="account" placeholder="请输入账号">
-                </div>
-            </div>
-            <div class="form-group el-form-item">
-                <div class="el-form-item_content">
-                    <input required type="password" class="form-control el-input w-100" id="exampleInputName2"
-                        name="password" placeholder="请输入密码">
-                </div>
-            </div>
-            <div class="form-group el-form-item">
-                <div class="el-form-item_content">
-                    <input required type="password" class="form-control el-input form-validate-yzm-inp box_content"
-                        name="verificationCode" id="exampleInputName2" placeholder="请输入验证码">
-                    <img src="./img/1.png" alt="失败" class="form-validate-yzm" />
-                </div>
-            </div>
-            <div class="form-group el-form-item">
-                <div class="el-form-item_content">
-                    <button class="btn btn-primary w-100" id="login-btn" type="submit">登录</button>
-                </div>
-            </div>
-        </form>
-    </div> -->
-    <div class="el-dialog-close">
-        <div class="el-dialog-close-content">
-            <h4 style="font-weight: 600;">当前数据是否要推送国抽？</h4>
-        </div>
-        <div class="el-dialog-close-btns btn-group">
-            <button class="btn">取消</button>
-            <button class="btn btn-primary">确认</button>
-        </div>
+      </div>
     </div>
-</body>
-<script>
-
-    $('#login-btn').click((evt) => {
-        evt.preventDefault()
-        const formData = new FormData($('#login-form-options')[0])
-        if(!formData.get('account')){
-            return alert('账号不能为空')
-        }
-        if(!formData.get('password')){
-            return alert('密码不能为空')
-        }
-        if(!formData.get('verificationCode')){
-            return alert('验证码不能为空')
-        }
+  </body>
+  <script>
+    $('#el-update-btn').click(function(){
+      $('#el-update-content-input-gij').click()
     })
-
-</script>
-
+    
+    $('#el-update-content-input-gij').change(function({target}){
+      console.log(target.files);
+    })
+  </script>
 </html>

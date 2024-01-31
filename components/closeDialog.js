@@ -20,7 +20,7 @@ window.components.push({
                 emits.confirm()
             }
             if (flag.filter(Boolean).length) {
-                props.destroy()
+                emits.destroy()
             }
         })
         return html

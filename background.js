@@ -1,8 +1,8 @@
-import { baseUrl, prems, url1, url1Key, url2, url2Query, onBeforeSendHeadersOptions, createCurrentDataTask, runCurrentDataTask, sendMessage, addSendHeaders, sendHeadersHas, createDataMp } from "./utils/index.js"
+import { baseUrl, prems, url1, url1Key, url2, url2Query, onBeforeSendHeadersOptions, createCurrentDataTask, runCurrentDataTask, sendMessage, addSendHeaders, sendHeadersHas, createDataMp, dataURLtoBlob } from "./utils/index.js"
 
 let isAutoGenerateXmlHeader = true
 
-console.log(chrome,Date.now());
+console.log(chrome, Date.now());
 
 function onBeforeSendHeadersListener(res) {
     if (res.type === "xmlhttprequest") {
@@ -65,12 +65,94 @@ function setCurrentDataId(id) {
     autoGenerateXmlHeader(0)
 }
 
+const loginstatusUrl = ('http://127.0.0.1:8001' || "http://192.168.1.43:8006")
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     console.log(request, 'background');
+    const message = request.message;
     switch (request.type) {
         case 'TABLECLICK':
             setCurrentDataId(request.id)
+            break
+        case "LOGIN":
+            fetch(loginstatusUrl + "/login", {
+                method: "POST",
+                body: JSON.stringify({
+                    info: message.info,
+                    items: message.items,
+                    allItems: message.allItems,
+                    nickname: message.nickname,
+                    password: message.password,
+                    code: message.code
+                }),
+                headers: { 'Content-Type': 'application/json' }
+            }).then(res => res.json()).then(res => {
+                sendMessage({
+                    type: "LOGINRESPONSE", message: {
+                        code: 200, data: res
+                    }
+                })
+            }).catch(err => {
+                sendMessage({
+                    type: "LOGINRESPONSE", message: {
+                        code: 500
+                    }
+                })
+            })
+            break
+        case "LOGINSTATUS":
+            fetch(loginstatusUrl + "/loginstatus", {
+                method: "POST",
+                body: JSON.stringify({
+                    info: message.info,
+                    items: message.items,
+                    allItems: message.allItems,
+                    nickname: message.account,
+                    password: message.password
+                }),
+                headers: { 'Content-Type': 'application/json' }
+            }).then(res => res.json()).then(res => {
+                sendMessage({
+                    type: "LOGINSTATUSRESPONSE", message: {
+                        code: 200, data: res
+                    }
+                })
+            }).catch(err => {
+                sendMessage({
+                    type: "LOGINSTATUSRESPONSE", message: {
+                        code: 500
+                    }
+                })
+            })
+            break
+        case "PUSHSTATUS":
+            const files = message.files
+            const formData = new FormData()
+            if (files) {
+                for (let w = 0; w < files.length; w++) {
+                    formData.append('file', dataURLtoBlob(files[w]))
+                }
+            }
+            formData.append("sampleNumber", message.sampleNumber)
+            formData.append("id", message.id)
+            formData.append("flags", message.flag)
+            fetch(loginstatusUrl + "/pushstatus", {
+                method: "POST",
+                body: formData,
+                headers: { 'Content-Type': 'multipart/form-data' }
+            }).then(res => res.json()).then(res => {
+                sendMessage({
+                    type: "PUSHSTATUSRESPONSE", message: {
+                        code: 200, data: res, id: message.id
+                    }
+                })
+            }).catch(err => {
+                sendMessage({
+                    type: "PUSHSTATUSRESPONSE", message: {
+                        code: 500
+                    }
+                })
+            })
             break
     }
 });

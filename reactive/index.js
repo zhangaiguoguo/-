@@ -10,7 +10,7 @@
                 return factory(w);
             };
     } else {
-        factory(global);
+        window.hooks = factory(global);
     }
 }(typeof window !== "undefined" ? window : this, function (window, noGlobal) {
     'use strict';
@@ -1525,9 +1525,9 @@
                     const state = _currentState.state
                     let current = state[currentSub] || state[state.push(_createState(target, options)) - 1];
                     const _options = current.options || options
-                    if (!('replaceFlag' in _options)) options.replaceFlag = true
+                    if (!('replaceFlag' in _options)) options.replaceFlag = false
                     current = _is(current.initValue, target) || !_options.replaceFlag ? current : (current.next = state.splice(currentSub, 1, _createState(target, options, current)) && state[currentSub]);
-                    current._scheduler = _options?.scheduler || _currentState.scheduler || currentScheduler
+                    current._scheduler = _options?.scheduler || _currentState.scheduler || currentScheduler;
                     return [current.value, (current.scheduler || (current.scheduler = (value) => {
                         if (!_is(value, current.value)) {
                             current.add(value)
@@ -1604,6 +1604,14 @@
         function useState(target, options = {}) {
             if (_judgeCurrentState()) return
             return createCurrentState(target, options)
+        }
+
+        function useUpdate() {
+            if (_judgeCurrentState()) return
+            const updateScheduler = currentState.scheduler
+            return () => {
+                updateScheduler && updateScheduler()
+            }
         }
 
         function useEffect(callback, deps) {
@@ -1720,6 +1728,7 @@
             useRef: useRef,
             useEffectPre: useEffectPre,
             useEffectSync: useEffectSync,
+            useUpdate: useUpdate
         }
     })()
     const stateRefTask = new WeakMap();
@@ -1770,6 +1779,5 @@
         shallowRef, toValues, isReactive, toValue, isRef, unref, isProxy, toRaw, markRaw, unMarkRaw, unProxy,
         effectScope, nextTick, effectReactive, watchEffectSync, propsReactive, triggerRef, EffectScope, toRefsModel, configTool, isFunction, isObject, isArray, ...$$hooks
     }
-    window.hooks = hooks
     return hooks
 }))

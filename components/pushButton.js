@@ -21,7 +21,7 @@
                     })
                 })
             }, [])
-            const html = $(`<div class="btn-group btn-group-box-hij">${toValue(pushStatusErrorTip) ? `<span class="el-tip-error">${toValue(pushStatusErrorTip)}</span><a ${buttonsRef[1]} class="el-a-link-refresh">刷新</a>` : ""}<button ${buttonsRef[0]} class="el-button btn btn-primary el-button-t${toValue(pushStatusErrorTip) ? ' el-button-none-plj' : ''}" id="push-btn-gg-pl" title='推送国抽'>${toValue(loading) ? toValue(tipLoadingValue) : '推送国抽'}</button></div>`)
+            const html = $(`<div class="btn-group btn-group-box-hij">${toValue(pushStatusErrorTip) ? `<span class="el-tip-error">${toValue(pushStatusErrorTip)}</span><a ${buttonsRef[1]} class="el-a-link-refresh">刷新</a>` : ""}<button ${buttonsRef[0]} class="el-button btn btn-primary el-button-t${toValue(pushStatusErrorTip) ? ' el-button-none-plj' : ''}" id="push-btn-gg-pl" title='推送国抽'>${toValue(loading) ? toValue(tipLoadingValue) : '推送国抽'}</button</div>`)
             if (loading.value) {
                 html.find('#push-btn-gg-pl').append(findComponentTemplate('loading')({
                     isInset: true
@@ -33,6 +33,8 @@
                     nationalPumpPush();
                 } else if ($(target).attr(buttonsRef[1]) !== void 0) {
                     emits.update()
+                }else if ($(target).attr(buttonsRef[2]) !== void 0){
+                    emits.login()
                 }
             })
             return html

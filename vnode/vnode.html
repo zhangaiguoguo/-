@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+  </head>
+  <body>
+    <div id="app" a b="123">
+      <ElButton>点击</ElButton>
+      <div class="app-children-1">
+        你好
+        <div>
+          <div>
+            <div>
+              <a href=""></a>
+              <svg>
+                <path></path>
+              </svg>
+              <iframe src="" frameborder="0">
+                <div>123</div>
+              </iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+      <input type="text" value="123" />
+      <button>点击</button>
+      <!-- 你好 -->
+    </div>
+    <br />
+    <hr />
+    <div id="root"></div>
+    <br />
+    <button id="gxBtn">更新</button>
+  </body>
+  <script src="../reactive/index.js"></script>
+  <script src="../js/jquery.js"></script>
+  <script src="./index.js"></script>
+  <script>
+    const app = document.querySelector("#app");
+    let rnode = null;
+    let vnode = null;
+    function nodeDiff() {
+      rnode = vnodeHooks.vNodeCompareDiff(vnode, rnode);
+    //   !$("#root").find("#app").length && $("#root").append(rnode.el);
+    }
+    function run() {
+      vnode = vnodeHooks.parseNodeTree(app);
+      nodeDiff();
+    }
+    run();
+    $("#gxBtn").click(function () {
+      run();
+    });
+    console.log(rnode);
+  </script>
+</html>

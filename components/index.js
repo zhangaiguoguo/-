@@ -1,11 +1,11 @@
-const { ref, watch, useStateRef, useEffectRef, effectScope, toValue } = window.hooks
+const { ref, watch, useStateRef, useEffectRef, effectScope, toValue, useUpdate, useEffect, useEffectPre, useState } = window.hooks
 
 window.globalState = {
     alreadyPushedData: new Map(),
     pushStatusLoading: ref(false),
     pushStatusErrorTip: ref(null),
     currentCreateButton: null,
-    buttonsRef: ['push-national-draw', 'again-refresh'],
+    buttonsRef: ['push-national-draw', 'again-refresh', 'btn-login'],
     obsTreeStr: "div.main div.content #gbox_list table#list tbody",
     trCurrentDataMps: new Map(),
     trMps: new Map(),
@@ -16,6 +16,11 @@ window.globalState = {
     currentFuncStatus: ref(null),
     currentTaskMainRootEl: ref(null),
     createDOMATTRREFS: ['el-attr-ref', '-value-'],
+    currentVerificationCode: ref(null),
+    currentLoginStatus: ref(null),
+    currentLoginStatusErrorTip: ref(null),
+    currentLoginStatusFlag: ref(false),
+    currentDataIsPushGC: ref(false)
 }
 
 window.components = []
@@ -58,15 +63,25 @@ function findtdsValue2(tds, k) {
 function createDOM(el, callback) {
     const createDOMATTRREFS = globalState.createDOMATTRREFS
     let $el = null
-    const render = hooks.renderScheduler((props) => {
-        if ($el) {
-            $el.remove()
-        }
-        $el = $(callback({ props, destroy: () => $el.remove() })).attr(createDOMATTRREFS[0], createDOMATTRREFS[0] + createDOMATTRREFS[1] + Date.now())
-        return $(el).append($el)
-    })
+    let render = null
+    function setRender() {
+        render = hooks.renderScheduler((props) => {
+            if ($el) {
+                $el.remove()
+            }
+            $el = $(callback({
+                props, destroy: () => $el.remove(), refresh: () => {
+                    setRender()
+                }
+            })).attr(createDOMATTRREFS[0], createDOMATTRREFS[0] + createDOMATTRREFS[1] + Date.now())
+            return $(el).append($el)
+        })
+    }
+    setRender()
     const update = (props = {}) => {
-        return render({ ...props, updateScheduler: update })
+        return render({
+            ...props, updateScheduler: update,
+        })
     }
     return update
 }
@@ -80,6 +95,9 @@ function getLoginInfo() {
 
 function setLoginInfo(account, password, token) {
     return setCookie('loginInfo', zip({ account, password, token, state: 1 }))
+}
+function removeLoginInfo() {
+    return removeCookie('loginInfo')
 }
 
 // 压缩
@@ -168,13 +186,50 @@ function obsDOM(obsTreeStr, callback) {
     }
 }
 
+const keys = ['TastConclusion', 'TaskValue']
+
 function nationalPumpPush() {
+    globalState.currentDataIsPushGC.value = false
     if (!trCurrentDataMps.has(currentId.value)) {
         return pushStatusErrorTip.value = "数据获取异常，无法推送"
     }
-    if (getLoginInfo().state !== 1) {
-        return loginAlterHandler()
+    if (!toValue(globalState.currentLoginStatusFlag)) {
+        globalState.currentDataIsPushGC.value = true
+        return getLoginStatus()
     }
-    alreadyPushedData.set(currentId.value, true)
-    console.log("成功", trCurrentDataMps.get(currentId.value), toValue(currentCYDNumber));
+    const row = trCurrentDataMps.get(currentId.value)
+    if (row.info[keys[0]] === "不合格") {
+        tastConclusionMaskLayer()
+    } else if (row.info[keys[1]].indexOf("Q/") !== -1) {
+        createUpLoadFileNode()
+    } else {
+        pushCurrentData()
+    }
+}
+
+
+function getLoginStatus() {
+    chrome.runtime.sendMessage({
+        type: "LOGINSTATUS", message: {
+            ...globalState.trCurrentDataMps.get(toValue(globalState.currentId)),
+            ...getLoginInfo()
+        }
+    })
+}
+
+function pushCurrentData(status = 1, options = {}) {
+    if (status == 1) {
+        alreadyPushedData.set(currentId.value,)
+        console.log("当前推送数据：", trCurrentDataMps.get(currentId.value), toValue(currentCYDNumber));
+    } else {
+        alreadyPushedData.delete(currentId.value)
+    }
+    globalState.pushStatusLoading.value = true
+    chrome.runtime.sendMessage({
+        type: "PUSHSTATUS", message: {
+            sampleNumber: toValue(globalState.currentCYDNumber), id: toValue(globalState.currentId),
+            flag: status,
+            files: options.files
+        }
+    })
 }

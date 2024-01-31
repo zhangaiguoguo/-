@@ -49,6 +49,8 @@
                 "components/loading.js",
                 "components/closeDialog.js",
                 "components/pushButton.js",
+                "components/elUpdateFile.js",
+                "components/icons/index.js",
                 "content.js"
             ],
             "run_at": "document_idle"
