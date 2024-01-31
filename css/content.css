@@ -34,7 +34,8 @@
 
 .login-box-hij .login-box-form {
   width: 100%;
-  height: 100%;
+  height: fit-content;
+  overflow: hidden auto;
 }
 
 .login-box-hij .box_content {
@@ -164,6 +165,7 @@
 
 .el-button-t {
   position: relative;
+  overflow: hidden;
 }
 
 .el-button-t {
@@ -328,4 +330,9 @@ button.el-button-none-plj {
 .el-update-gij .el-update-footer-gij #el-update-btn-save {
   padding: 2px 16px;
   position: relative;
+}
+
+.login-box-hij .login-title-content-hij{
+    padding:6px 12px;
+    display: block;
 }

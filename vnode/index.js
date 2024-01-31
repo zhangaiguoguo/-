@@ -59,10 +59,12 @@
     function synthesisArray(target) {
         return isArray(target) ? target : [target]
     }
-
-    const TEXTREF = createSymbol('text', 3)
-    const ELEMENTREF = createSymbol('element', 1)
-    const COMMENTREF = createSymbol('comment', 8)
+    const TEXT_NODE = Node.TEXT_NODE
+    const ELEMENT_NODE = Node.ELEMENT_NODE
+    const COMMENT_NODE = Node.COMMENT_NODE
+    const TEXTREF = createSymbol('text', TEXT_NODE)
+    const ELEMENTREF = createSymbol('element', ELEMENT_NODE)
+    const COMMENTREF = createSymbol('comment', COMMENT_NODE)
     const ELEMENTTYPE = createSymbol('elementType', null)
 
     function nodeTypeSymbolFind(target, done = false) {
@@ -111,7 +113,7 @@
         return createvNodeBloak((bloak) => {
             bloak.tag = nodeBloak[0]
             bloak.attrs = nodeBloak[1]
-            bloak.type = 1
+            bloak.type = ELEMENT_NODE
             bloak[ELEMENTTYPE[0]] = nodeTypeSymbolFind(bloak.type)
             bloak.children = nodeBloak[2]
             return bloak
@@ -121,7 +123,7 @@
     function createVnodeText(text) {
         return createvNodeBloak((bloak) => {
             bloak.tag = "#text"
-            bloak.type = 3
+            bloak.type = TEXT_NODE
             bloak[ELEMENTTYPE[0]] = nodeTypeSymbolFind(bloak.type)
             bloak.content = text
             return bloak
@@ -131,7 +133,7 @@
     function createVnodeComment(text) {
         return createvNodeBloak((bloak) => {
             bloak.tag = "#comment"
-            bloak.type = 8
+            bloak.type = COMMENT_NODE
             bloak[ELEMENTTYPE[0]] = nodeTypeSymbolFind(bloak.type)
             bloak.content = text
             return bloak
@@ -148,13 +150,13 @@
 
     function nodeTypeHandler(node, hooks, args = []) {
         switch (node.nodeType) {
-            case 3:
+            case TEXT_NODE:
                 hooks.textHook(node, ...args)
                 break
-            case 1:
+            case ELEMENT_NODE:
                 hooks.elementHook(node, ...args)
                 break
-            case 8:
+            case COMMENT_NODE:
                 hooks.commentHook(node, ...args)
                 break
         }
@@ -255,22 +257,94 @@
         return rnode
     }
 
+    function getNodeRefType(node) {
+        return node[ELEMENTTYPE[0]]
+    }
+
+    function setNodeValue(node, value) {
+        if (node.nodeValue) {
+            node.nodeValue = value
+        }
+    }
+
+    function nodeTypeTEXTCOMMENTValidate(vnode, rnode) {
+        if (vnode.content != rnode.content) {
+            setNodeValue(rnode.el, vnode.content)
+        }
+    }
+
+    function judgeNodeAttrSame(vnode, rnode) {
+        const nAttrs = (vnode.attrs || {}), rAttrs = (rnode.attrs || {}), nAttrLen = keys(nAttrs), rAttrLen = keys(rAttrs)
+        if ((nAttrLen.length !== rAttrLen.length) || nAttrLen.some((atr) => nAttrs[atr] !== rAttrs[atr])) {
+            return true
+        }
+        return false
+    }
+
+    const _keys = Object.keys
+    function keys(target) {
+        return _keys(target)
+    }
+
+    // const nodeTypes = [getNodeRefType(vnode), getNodeRefType(rnode)]
+    // if (nodeTypes[0] === nodeTypes[1]) {
+    //     switch (nodeTypes[0]) {
+    //         case TEXTREF[0]:
+    //             nodeTypeTEXTCOMMENTValidate(vnode, rnode)
+    //             break
+    //         case COMMENTREF[0]:
+    //             nodeTypeTEXTCOMMENTValidate(vnode, rnode)
+    //             break
+    //     }
+    // }
+
     function vNodeCompareDiffRun(vnode, rnode) {
-        const mps = new Map()
         const vnodeChildren = vnode.children
         const rnodeChildren = rnode.children
         return () => {
-            if ((!vnodeChildren || !vnodeChildren.length) && rnodeChildren) {
-                for (let n = 0; n < rnodeChildren.length; n++) {
-                    removeChild(rnodeChildren, n)
-                    n--
-                }
-            } else if ((!rnodeChildren || !rnodeChildren.length) && vnodeChildren) {
-                for (let n = 0; n < vnodeChildren.length; n++) {
-                    const rcNode = new VNode(vnodeChildren[n])
-                    rcNode.apped(rnode.el)
-                    createObjArray(rnode, 'children').push(rcNode)
-                    vNodeCompareDiffRun(vnodeChildren[n], rcNode)()
+            {
+                if ((!vnodeChildren || !vnodeChildren.length) && rnodeChildren) {
+                    for (let n = 0; n < rnodeChildren.length; n++) {
+                        removeChild(rnodeChildren, n)
+                        n--
+                    }
+                } else if ((!rnodeChildren || !rnodeChildren.length) && vnodeChildren) {
+                    for (let n = 0; n < vnodeChildren.length; n++) {
+                        const rcNode = new VNode(vnodeChildren[n])
+                        rcNode.apped(rnode.el)
+                        createObjArray(rnode, 'children').push(rcNode)
+                        vNodeCompareDiffRun(vnodeChildren[n], rcNode)()
+                    }
+                } else if (getNodeRefType(vnode) !== getNodeRefType(rnode)) {
+                    console.log('----');
+                } else if (vnodeChildren && rnodeChildren) {
+                    const addMps = []
+                    const useMps = []
+                    for (let n = 0; n < vnodeChildren.length; n++) {
+                        const _vnode = vnodeChildren[n]
+                        const _rnode = rnodeChildren[n]
+                        let vflag = [], rflag = false;
+                        if (!_rnode) {
+                            vflag.push(0)
+                        } else {
+                            if (getNodeRefType(_vnode) !== getNodeRefType(_rnode)) {
+                                vflag = 1
+                            } else if (_vnode.tag !== _rnode.tag) {
+                                vflag = 2
+                            }
+                            if (judgeNodeAttrSame(_vnode, _rnode)) {
+                                vflag = 3
+                            }
+                        }
+                        if (vflag.length) {
+                            addMps.push({
+                                vnode: _vnode,
+                                perms: vflag,
+                                rnode: _rnode
+                            })
+                        }
+                    }
+                    console.log(addMps, useMps);
                 }
             }
         }

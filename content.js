@@ -60,6 +60,7 @@ const tastConclusionMaskLayer = createDOM($(document.body), function (props) {
     })
 })
 
+// loginAlterHandler()
 
 obsDOM(obsTreeStr, (v) => {
     v.children().each((i, v) => {

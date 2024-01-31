@@ -7,6 +7,7 @@
   </head>
   <body>
     <div id="app" a b="123">
+      你好
       <ElButton>点击</ElButton>
       <div class="app-children-1">
         你好
@@ -33,6 +34,7 @@
     <div id="root"></div>
     <br />
     <button id="gxBtn">更新</button>
+    <button id="btn2">插入新元素</button>
   </body>
   <script src="../reactive/index.js"></script>
   <script src="../js/jquery.js"></script>
@@ -43,7 +45,7 @@
     let vnode = null;
     function nodeDiff() {
       rnode = vnodeHooks.vNodeCompareDiff(vnode, rnode);
-    //   !$("#root").find("#app").length && $("#root").append(rnode.el);
+      !$("#root").find("#app").length && $("#root").append(rnode.el);
     }
     function run() {
       vnode = vnodeHooks.parseNodeTree(app);
@@ -53,6 +55,9 @@
     $("#gxBtn").click(function () {
       run();
     });
+    $('#btn2').click(function () {
+      $('#app').append($('<div class="123" a>你好</div>'))
+    })
     console.log(rnode);
   </script>
 </html>

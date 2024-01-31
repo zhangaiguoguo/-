@@ -1,24 +1,14 @@
 {
+    let htmlProxy = null
     const { currentVerificationCode, pushStatusLoading, trCurrentDataMps, currentId, pushStatusErrorTip } = window.globalState;
     window.components.push({
         name: "login",
         render(props, emits) {
-            useEffect(() => {
-                watch(pushStatusLoading, v => {
-                    const btn = html.find("button#login-btn").attr('disabled', v)
-                    btn.find("#el-loading-mask-hig-id").remove()
-                    if (v) {
-                        btn.append(findComponentTemplate('loading')({ isInset: true }))
-                    } else {
-                    }
-                }, {
-                    immediate: true
-                })
-            }, [])
-            const html = $(findComponentTemplate('maskLayer')({}, {
+            const html = (htmlProxy = $(findComponentTemplate('maskLayer')({}, {
                 default: () => $(`
                 <div class="login-box-hij">
                 <div class="login-title">
+                    <span class="login-title-content-hij">登录</span>
                     <a href="javascript:;" class="btn btn-link login-close-btn">
                         ${findIconHandlerTemplate('close')()}
                     </a>
@@ -53,7 +43,19 @@
                 </form>
                 </div>
                 `)
-            }))
+            })))
+            useEffect(() => {
+                watch(pushStatusLoading, v => {
+                    const btn = htmlProxy.find("button#login-btn").attr('disabled', v)
+                    btn.find("#el-loading-mask-hig-id").remove()
+                    if (v) {
+                        btn.append(findComponentTemplate('loading')({ isInset: true }))
+                    } else {
+                    }
+                }, {
+                    immediate: true
+                })
+            }, [])
             html.find("button#login-btn").click(function (evt) {
                 currentLoginStatusErrorTip.value = null
                 loginHandler(html, evt, emits)
