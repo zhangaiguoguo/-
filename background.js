@@ -65,7 +65,7 @@ function setCurrentDataId(id) {
     autoGenerateXmlHeader(0)
 }
 
-const loginstatusUrl = ('http://127.0.0.1:8001' || "http://192.168.1.43:8006")
+const loginstatusUrl = ("http://labhub-fsp.cpolar.cn")
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     console.log(request, 'background');
@@ -81,9 +81,9 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
                     info: message.info,
                     items: message.items,
                     allItems: message.allItems,
-                    nickname: message.nickname,
+                    username: message.nickname,
                     password: message.password,
-                    code: message.code
+                    captcha: message.captcha
                 }),
                 headers: { 'Content-Type': 'application/json' }
             }).then(res => res.json()).then(res => {

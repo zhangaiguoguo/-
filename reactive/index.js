@@ -1335,7 +1335,6 @@
         }
         function createState() {
             const _index = index
-            const __ = collectTime()
             let _gate = false
             try {
                 return def({
@@ -1344,8 +1343,6 @@
                     effects: [],
                     effectIndex: 0,
                     stateIndex: 0,
-                    id: Date.now(),
-                    _: __(),
                     _index: _index,
                     flag: true,
                 }, 'gate', {
@@ -1404,7 +1401,6 @@
             const state = {
                 initValue: target,
                 history: [target],
-                updateTime: null,
                 optionbs: options || null,
                 scheduler: null,
                 prevUpdateTime: null,
@@ -1417,16 +1413,7 @@
                 prev: prev || null,
                 next: null
             }
-            let _updateTime = null
-            def(state, "updateTime", {
-                get() {
-                    return _updateTime
-                },
-                set(v) {
-                    state.prevUpdateTime = _updateTime
-                    _updateTime = v
-                }
-            })[1](state, 'value', {
+            def(state, 'value', {
                 get() {
                     return state.history.at(-1)
                 }

@@ -1,6 +1,6 @@
 
 import eval5 from "./eval5.js"
-export const baseUrl = `http://127.0.0.1:8001` || `http://192.168.0.28`
+export const baseUrl = `http://192.168.0.28`
 // 对两个不同的viewID发起POST请求
 export const prems = ['c4c08163-5e9e-4e96-913f-787ef0da6616', '6b30daab-8cc1-4908-84d6-284d96353b7f']
 export const url1 = baseUrl + `/Data/CustomizeData`;

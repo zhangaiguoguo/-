@@ -87,7 +87,8 @@
                         items: message.items,
                         info: message.info,
                         password: formData.get('password'),
-                        nickname: formData.get('account')
+                        nickname: formData.get('account'),
+                        captcha: formData.get('verificationCode')
                     }
                 })
                 setLoginInfo(formData.get('account'), formData.get('password'))

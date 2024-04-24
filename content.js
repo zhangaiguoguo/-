@@ -60,13 +60,17 @@ const tastConclusionMaskLayer = createDOM($(document.body), function (props) {
     })
 })
 
-// loginAlterHandler()
+loginAlterHandler()
 
 obsDOM(obsTreeStr, (v) => {
     v.children().each((i, v) => {
         if (trMps.has(v)) return
         trMps.set(v, true)
         $(v).click(() => {
+            if (currentId.value && currentId.value !== $(v).attr('id')) {
+                closeDislogHandle2()
+                return
+            }
             currentId.value = null
             pushStatusErrorTip.value = null
             if (toValue(obsDOMTrMps)) toValue(obsDOMTrMps)();
@@ -76,6 +80,7 @@ obsDOM(obsTreeStr, (v) => {
 });
 
 watch(currentId, v => {
+    obsDOMTrMps.value?.();
     if (v) {
         obsDOMTrMps2.value = obsDOM(`div.taskMain div#LIMSTestReportApproveDetail>table tbody .childDiv table.resizabletable tbody`, function (v) {
             const tds = v.find('td>span')
@@ -85,6 +90,7 @@ watch(currentId, v => {
                 const validateVal = "食品安全监督抽检"
                 if (wtddwName.length && wtddwName.indexOf(validateVal) > -1) {
                     obsDOMTrMps.value = obsDOM('div.taskMain ul#_sys_TabMain div.reportListPages', (root) => {
+                        obsDOMTrMps.value?.();
                         currentTaskMainRootEl.value = root
                         getCurrentPushData()
                     })
@@ -162,12 +168,14 @@ function closeDislogHandle(root) {
 
 const createCloseDialog = createDOM($(document.body), function (props) {
     const closeDialog = $(findComponentTemplate('closeDialog')({}, {
-        default: () => $(`<h4 style="font-weight:600;">前数据可推送国抽，是否继续 ？</h4>`)
+        default: () => $(`<h4 style="font-weight:600;">当前数据可推送国抽，是否继续 ？</h4>`)
     }, {
         cancel() {
             commontjs()
-            if (toValue(currentLoginStatusFlag))
+            if (toValue(currentLoginStatusFlag)){
                 pushCurrentData(0)
+            }
+            currentId.value = null
         },
         confirm() {
             nationalPumpPush()
@@ -204,11 +212,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             break
         case 'LOGINSTATUSRESPONSE':
             pushStatusLoading.value = false
-            const FLAGKEY = "flag"
+            const FLAGKEY = "status"
             if (message.code === 200) {
                 currentLoginStatusFlag.value = message.data[FLAGKEY]
                 if (!message.data[FLAGKEY]) {
-                    currentVerificationCode.value = message.data.data
+                    currentVerificationCode.value = message.data.value
                     loginAlterHandler()
                 } else {
                     if (toValue(currentDataIsPushGC)) {
@@ -234,8 +242,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             pushStatusLoading.value = false
             currentLoginStatus.value?.()
             if (message.code === 200) {
-                currentLoginStatusFlag.value = message.data.flag
-                if (message.data.flag) {
+                currentLoginStatusFlag.value = message.data.status
+                if (message.data.status) {
                     if (toValue(currentDataIsPushGC)) {
                         nationalPumpPush()
                     }
