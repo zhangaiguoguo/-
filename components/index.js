@@ -163,7 +163,10 @@ function obsDOM(obsTreeStr, callback) {
             const el = $(obsTreeStr)
             if (!el.length) {
                 return run();
-            } else if (!getNum) callback(el)
+            } else if (!getNum) {
+                callback(el)
+                cancelAnimationFrame(id);
+            }
             if (!flag) return
             const obss = new MutationObserver((v) => {
                 if (!flag) return obss.disconnect();
@@ -171,7 +174,7 @@ function obsDOM(obsTreeStr, callback) {
                     run();
                     return obss.disconnect();
                 }
-                callback(el);
+                getNum && callback(el);
             });
             obss.observe(el[0], {
                 "childList": true,

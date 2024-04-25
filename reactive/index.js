@@ -1,14 +1,11 @@
 (function (global, factory) {
     "use strict";
     if (typeof module === "object" && typeof module.exports === "object") {
-        module.exports = global.document ?
+        module.exports = typeof global === "object" && global.document ?
             factory(global, true) :
             function (w) {
-                if (!w.document) {
-                    throw new Error("error");
-                }
                 return factory(w);
-            };
+            }(module.exports)
     } else {
         window.hooks = factory(global);
     }
@@ -51,6 +48,7 @@
 
     //全局配置
     const configTool = {
+        console: log,
         /**
          *  be dependent on id
          */
@@ -95,6 +93,7 @@
             return currentScheduler
         },
     })
+
     function generateArray(v) {
         return isArray(v) ? v : [v];
     }
@@ -144,6 +143,7 @@
     function ordinaryType(v) {
         return !isFunction(v) && !_isObject(v)
     }
+
     function __$isReactive(target) {
         if (configTool.proxy.has(target)) {
             return [target, configTool.proxy.get(target)]
@@ -155,13 +155,14 @@
         }
         return !~~1
     }
+
     function isReactive(target) {
         return !!__$isReactive(target)
     }
 
     /**
-    * Obtain the corresponding dep data based on the dep ID
-    */
+     * Obtain the corresponding dep data based on the dep ID
+     */
     function ProxyIndexOf(_) {
         const proxy = _isReactive(_)
         return proxy ? [proxy, proxy.dep] : void 0
@@ -239,28 +240,45 @@
             }
         }
     }
+
     function _iteratorGenerationSM(value, self) {
         return _iteratorGeneration(() => {
             _$size(self)
             return value()
         }, function (v) {
             const _value = v;
-            return { value: setProxy(_value.value, { root: self.selfProxy, dep: self.deps.get(_value.value)?.dep, }), done: _value.done }
+            return {
+                value: setProxy(_value.value, {
+                    root: self.selfProxy,
+                    dep: self.deps.get(_value.value) && self.deps.get(_value.value).dep,
+                }),
+                done: _value.done
+            }
         })
     }
+
     function _$iterator(self) {
         return _iteratorGeneration(() => {
             _$size(self)
             return self.self[Symbol.iterator].bind(self.self)()
         }, function (v) {
             const _value = v;
-            return { value: _value.done ? void 0 : [_value.value[0], setProxy(_value.value[1], { root: self.selfProxy, dep: self.deps.get(_value.value[0]) })], done: _value.done }
+            return {
+                value: _value.done ? void 0 : [_value.value[0], setProxy(_value.value[1], {
+                    root: self.selfProxy,
+                    dep: self.deps.get(_value.value[0])
+                })],
+                done: _value.done
+            }
         })
     }
+
     function _$get(p, config) {
         function _get(...args) {
             return getter({
-                self: config, ref: args[0], getData() {
+                self: config,
+                ref: args[0],
+                getData() {
                     return config.self.get(args[0])
                 }
             });
@@ -268,34 +286,57 @@
         return p === "has" ?
             function _has(...args) {
                 _get(...args)
-                const _target = (_isReactive(args[0])[1] || [{ self: args[0], selfProxy: args[0] }])[0]
+                const _target = (_isReactive(args[0])[1] || [{
+                    self: args[0],
+                    selfProxy: args[0]
+                }])[0]
                 return config.self.has(_target.self) || config.self.has(_target.selfProxy)
             } : _get
     }
+
     function _$set(p, config) {
         function _set(...args) {
             const oldValue = _$get("get", config)(args[0])
             const _type = _$get("has", config)(args[0]) ? "set" : "add"
             _$setSize(config)(config.self.size + 1)
             config.self[p](...args)
-            return setter({ self: config, ref: args[0], newVal: args[1], oldVal: oldValue, type: _type });
+            return setter({
+                self: config,
+                ref: args[0],
+                newVal: args[1],
+                oldVal: oldValue,
+                type: _type
+            });
         }
-        return p === "add" ? function _add(...args) { _set(...args) } : _set
+        return p === "add" ? function _add(...args) {
+            _set(...args)
+        } : _set
     }
+
     function _$delete(config) {
         return function _delete(...args) {
             const oldValue = _$get("get", config)(args[0])
             let isDelete = false
             if (config.selfProxy.has(args[0])) {
                 isDelete = true;
-                const _target = (_isReactive(args[0])[1] || [{ self: args[0], selfProxy: args[0] }])[0]
+                const _target = (_isReactive(args[0])[1] || [{
+                    self: args[0],
+                    selfProxy: args[0]
+                }])[0]
                 _$setSize(config)(config.self.size - 1)
                 config.self.delete(_target.self) || config.self.delete(_target.selfProxy)
             }
-            setter({ self: config, ref: args[0], newVal: void 0, oldVal: oldValue, type: 'delete' })
+            setter({
+                self: config,
+                ref: args[0],
+                newVal: void 0,
+                oldVal: oldValue,
+                type: 'delete'
+            })
             return isDelete;
         }
     }
+
     function _$clear(config) {
         return function _clear() {
             for (let w of config.self) {
@@ -304,18 +345,27 @@
             return !0;
         }
     }
+
     function _$setSize(config) {
         return function _$setSize(v) {
             const oldValue = config.self.size
             try {
                 config.self.size = v
             } catch (e) { }
-            setter({ self: config, ref: "size", newVal: v, oldVal: oldValue })
+            setter({
+                self: config,
+                ref: "size",
+                newVal: v,
+                oldVal: oldValue
+            })
         }
     }
+
     function _$size(config) {
         return getter({
-            self: config, ref: "size", getData() {
+            self: config,
+            ref: "size",
+            getData() {
                 return config.self['size']
             }
         });
@@ -379,8 +429,9 @@
             },
         })
     }
+
     function __toValue(target) {
-        if (target && (isReactiveSensitive(target) || target.is_ref === true)) {
+        if (target && (target._is_ref === true)) {
             return target.value
         }
         return target
@@ -396,6 +447,7 @@
         }
         triggerEffects(...arguments)
     }
+
     function triggerEffects(target, ref, type, newVal, oldVal, onTriggerFlag = true) {
         try {
             const config = __$isReactive(target)[1];
@@ -425,7 +477,13 @@
     }
     /* Functions for modifying proxy object properties set === setter (Need to step in and do something else) */
     function setter(target) {
-        const { self, ref, newVal, oldVal, type } = target;
+        const {
+            self,
+            ref,
+            newVal,
+            oldVal,
+            type
+        } = target;
         if (is(newVal, oldVal)) return;
         return triggerEffects(self.self, ref, type, newVal, oldVal)
     }
@@ -441,10 +499,15 @@
     }
 
     function getter(target) {
-        const { self, ref, getData } = target;
-        trackEffects(self.self, ref, "type")
+        const {
+            self,
+            ref,
+            getData
+        } = target;
         try {
-            return __toValue(self.isShallow ? getData() : setProxy(getData()));
+            trackEffects(self.self, ref, "type")
+            var result = getData();
+            return __toValue(self.isShallow ? result : result && result._is_ref ? result : setProxy(result));
         } catch (e) {
             log.warn1(e)
         }
@@ -465,14 +528,18 @@
         }
     }
 
+    function isRef2(target) {
+        return target._is_ref === true
+    }
+
     const proxyKEY1 = '__reactive'
 
     const proxyKEY2 = '__skip'
 
     function getTargetType(value) {
-        return value[proxyKEY2] || !Object.isExtensible(value)
-            ? 0 /* TargetType.INVALID */
-            : targetTypeMap(toRawType(value));
+        return value[proxyKEY2] || !Object.isExtensible(value) ?
+            0 /* TargetType.INVALID */ :
+            targetTypeMap(toRawType(value));
     }
     /**
      * Add proxy responsive data (dep)
@@ -491,15 +558,21 @@
         if (getTargetType(target) === 0) {
             return target
         }
-        let { root, dep, rootDeps, isShallow } = options || {}
+        let {
+            root,
+            dep,
+            rootDeps,
+            isShallow
+        } = options || {}
         const configToolProxy = __$isReactive(target)
         if (configToolProxy) {
+            if (isRef2(configToolProxy[0])) {
+                return configToolProxy[0]
+            }
             return configToolProxy[1].selfProxy
         }
         dep = dep || generateDep()
-        /* Configuration items for proxy dep */
         const config = createConfig(dep, target, root, rootDeps, isShallow)
-        /* It needs to be determined whether it is' Set 'or' Map '. If it is of these two types, it will be transferred to another proxy data method */
         let selfProxy;
         if (isSM(target)) {
             selfProxy = setProxySM.apply(config, [target, root, dep, rootDeps]);
@@ -522,12 +595,29 @@
                         }
                     }
                     const _type = Reflect.has(target, p) ? "set" : "add"
-                    Reflect.set(target, p, value, reactive);
-                    return setter({ self: config, ref: p, newVal: value, oldVal: oldValue, type: _type }) || true
+                    if (isRef(target[p])) {
+                        target[p].value = value
+                        return true
+                    } else {
+                        Reflect.set(target, p, value, reactive);
+                        return setter({
+                            self: config,
+                            ref: p,
+                            newVal: value,
+                            oldVal: oldValue,
+                            type: _type
+                        }) || true
+                    }
                 },
                 deleteProperty(target, p) {
                     const oldValue = Reflect.get(target, p);
-                    setter({ self: config, ref: p, newVal: void 0, oldVal: oldValue, type: "delete" });
+                    setter({
+                        self: config,
+                        ref: p,
+                        newVal: void 0,
+                        oldVal: oldValue,
+                        type: "delete"
+                    });
                     return Reflect.deleteProperty(target, p)
                 },
                 has(target, p) {
@@ -550,8 +640,12 @@
     function watchEffect(callback, options) {
         return doWatch(callback, () => { }, options || {})
     }
+
     function watchEffectSync(callback, options) {
-        return doWatch(callback, () => { }, { ...options || {}, flush: "sync" })
+        return doWatch(callback, () => { }, {
+            ...options || {},
+            flush: "sync"
+        })
     }
 
     function nextTick(fn) {
@@ -567,25 +661,38 @@
             }
         }
     }
+
     function _addDep(dep, _dep) {
         dep && dep.add(_dep)
     }
 
     function triggerTrack(dep) {
-        if (this !== void 0 && this !== window && this.constructor === EffectReactive) {
+        if (this !== void 0 && this !== window) {
             if (isFunction(this.onTrack) && dep) {
-                this.onTrack({ deps: dep, key: dep.$ref, type: "get" })
+                this.onTrack({
+                    deps: dep,
+                    key: dep.$ref,
+                    type: "get"
+                })
             }
         }
     }
+
     function triggerTrigger(dep, newValue, oldValue) {
-        if (this !== void 0 && this !== window && this.constructor === EffectReactive) {
+        if (this !== void 0 && this !== window) {
             if (isFunction(this.onTrigger) && dep) {
-                this.onTrigger({ deps: dep, key: dep.$ref, type: "set", newValue, oldValue })
+                this.onTrigger({
+                    deps: dep,
+                    key: dep.$ref,
+                    type: "set",
+                    newValue,
+                    oldValue
+                })
             }
         }
     }
     let currentWatcherScope = null
+
     function dependencyCollection(dep) {
         let _currentWatcherScope = currentWatcherScope
         while (_currentWatcherScope) {
@@ -607,6 +714,7 @@
             scheduler /* Dependency change function */,
             options = {}) {
             !isObject(options) && (options = {})
+            this.once = options.once;
             this.active = true
             this.parent = null
             this.deps = void 0
@@ -615,10 +723,14 @@
             this.fu = fu
             this.scheduler = scheduler
             this.isRecollect = !!options.isRecollect
+            this.isImplement = false
             options.init && this.run()
             recordEffectScope(this)
         }
         run() {
+            if (this.once && this.isImplement) {
+                this.stop()
+            }
             if (!this.active) return
             if (this.isRecollect && this.deps) {
                 this.start()
@@ -626,8 +738,6 @@
             this.parent = currentWatcherScope
             try {
                 currentWatcherScope = this
-                // const exa = new CollectDeps(this)
-                // exa.stop()
                 return this.fu(this)
             } finally {
                 currentWatcherScope = this.parent || null
@@ -637,7 +747,11 @@
         updateDeps(newVal, oldVal, dep, flag) {
             if (!this.active) return
             flag && triggerTrigger.apply(this, [dep, newVal, oldVal])
-            this.deps.has(dep) && this.scheduler(newVal, oldVal)
+            const flag2 = this.deps.has(dep)
+            if (flag2) {
+                this.isImplement = true
+                this.scheduler(newVal, oldVal);
+            }
         }
         start() {
             !this.active && (this.active = true)
@@ -645,10 +759,12 @@
         stop() {
             if (this.active) {
                 this.active = false
-                this.deps.forEach(dep => {
-                    dep.delete(this)
-                })
-                this.deps.clear()
+                if (this.deps) {
+                    this.deps.forEach(dep => {
+                        dep.delete(this)
+                    })
+                    this.deps.clear()
+                }
             }
         }
         opennessDeps() {
@@ -658,17 +774,17 @@
         }
     }
 
-    function effectReactive(...args) {
-        const _watcher = new EffectReactive(args[0], args[1], {
-            ...(args[2] || {}),
+    function effectReactive(fn, callback, options) {
+        const effect = new EffectReactive(arguments[0], arguments[1], {
+            ...(arguments[2] || {}),
             init: false,
         })
         return {
             run() {
-                return _watcher.run()
+                return effect.run()
             },
             stop() {
-                _watcher.stop()
+                effect.stop()
             }
         }
     }
@@ -677,8 +793,8 @@
         try {
             Object.defineProperty(target, key, {
                 ...(options || {}),
-                get: () => options.get?.(),
-                set: (v) => options.set?.(v),
+                get: () => options.get && options.get(),
+                set: (v) => options.set && options.set(v),
                 writable: false
             })
         } finally {
@@ -698,7 +814,11 @@
         return setProxy(target, null)
     }
 
-    function readonly(state) {
+    function isShallowFlagReadonlyRe(value, shallowFlag) {
+        return shallowFlag ? ordinaryType(value) ? value : reactive(value) : readonly(value)
+    }
+
+    function readonly(state, shallowFlag = false) {
         if (typeof state !== 'object' || state == null) return state
         const _errorHandler = (...a) => log.warn1(`${a} It is a read-only attribute and cannot be modified origin`, readonlyState)
         if (configTool.readonlys.has(state) || configTool.readonlys.get(state) == state) {
@@ -717,7 +837,7 @@
                         if (/^get/.test(p)) {
                             return function (...a) {
                                 const value = Reflect.get(target, p, reactive).call(_state, ...a)
-                                return readonly(value)
+                                return isShallowFlagReadonlyRe(value, shallowFlag)
                             }
                         }
                         /* Non modifiable method */
@@ -733,7 +853,7 @@
                 /* Object proxy */
                 return new Proxy(_state, {
                     get(target, p, reactive) {
-                        return Reflect.get(target, p, reactive)
+                        return isShallowFlagReadonlyRe(Reflect.get(target, p, reactive), shallowFlag)
                     },
                     set(target, p, value, reactive) {
                         _errorHandler(p)
@@ -782,13 +902,16 @@
             value
         });
     };
+
     function trackRefEffect(target) {
         if (currentWatcherScope) {
             configTool.proxy.set(target, configTool.proxy.get(target) || {
-                selfProxy: void 0, self: target,
+                selfProxy: void 0,
+                self: target,
                 deps: new Map()
             })
-            target.deps = trackEffects(target, "value", "get")
+            const deps = trackEffects(target, "value", "get")
+            toRaw(target.deps) !== deps && (target.deps = deps)
             if (target._objectRoot && target._key) {
                 trackEffects(target._objectRoot, target._key, "get")
             }
@@ -826,7 +949,7 @@
         constructor(callback) {
             if (this.is(callback)) {
                 this.deps = void 0
-                this.effect = null;
+                this.effect;
                 this._dirty = true
                 this._ref = true
                 this._is_ref = true
@@ -839,7 +962,7 @@
                 return !1;
             }
             this.get = !isHandler ? callback : callback.get;
-            this.set = callback.set || (() => log.warn1(""));
+            this.set = callback.set || (() => log.warn1("read only"));
             return !0;
         }
         get value() {
@@ -1025,6 +1148,7 @@
 
     function _reactiveToValueDeep(target) {
         const _obj = new WeakMap()
+
         function _run(_target) {
             const reactiveData = __$isReactive(_target) || [_target]
             if (_obj.has(reactiveData[0])) return
@@ -1039,8 +1163,7 @@
                         for (let w in _target) {
                             _run(_target[w])
                         }
-                    } catch {
-                    }
+                    } catch { }
                 }
             }
         }
@@ -1051,6 +1174,7 @@
     function isReactiveArr(target) {
         return !isReactive(target) && isArray(target) ? target.map(i => toValue(i)) : [target]
     }
+
     function argumentsFlatShape(_arguments) {
         if (!isArray(_arguments)) {
             return _arguments
@@ -1075,29 +1199,20 @@
     function queueJob(job) {
         const i = queue.findIndex(i => i === job || i[JOB_KEY] === job[JOB_KEY])
         if (i === -1) {
-            job[JOB_KEY] = Date.now()
+            job[JOB_KEY] = Date.now() + queue.length + 1
             queue.push(job);
         } else
             queue.splice(i, 1, job);
 
         queueFlush()
     }
+
     function queueFlush() {
         if (!isFlushing) {
             currentFlushPromise = resolvedPromise.then(flushJobs)
         }
     }
-    const getId = (job) => job.id == null ? Infinity : job.id;
-    const comparator = (a, b) => {
-        const diff = getId(a) - getId(b);
-        if (diff === 0) {
-            if (a.pre && !b.pre)
-                return -1;
-            if (b.pre && !a.pre)
-                return 1;
-        }
-        return diff;
-    };
+
     function callWithErrorHandling(fn, args) {
         let res;
         try {
@@ -1107,9 +1222,9 @@
         }
         return res;
     }
+
     function flushJobs(seen) {
         isFlushing = true
-        queue.sort(comparator);
         seen = seen || new Map()
         const check = (job) => checkRecursiveUpdates(seen, job);
         try {
@@ -1132,6 +1247,7 @@
     }
 
     const RECURSION_LIMIT = 100;
+
     function checkRecursiveUpdates(seen, fn) {
         if (!seen.has(fn)) {
             seen.set(fn, 1);
@@ -1148,31 +1264,28 @@
         }
     }
 
-    function doWatch(source, handler, { immediate, deep, flush, onTrack, onTrigger } = options || {}) {
+    function doWatch(source, handler, {
+        immediate,
+        deep,
+        flush,
+        onTrack,
+        onTrigger,
+        once
+    } = options) {
         if (ordinaryType(source)) {
             return log.warn1("")
         }
         let _source, getter;
-        if (isFunction(source)) {
-            _source = [source]
-        } else if (!isReactive(source) && isArray(source)) {
-            _source = source.map(item => isFunction(item) ? item : () => item)
-        } else if (isReactive(source) || true) {
-            _source = [() => [source]]
-        }
-        if (!flush) flush = "pre"
         let cleanup, newVal, oldVal;
         const job = () => {
             oldVal = newVal || void 0
             newVal = _effectReactive.run();
             handler(newVal, oldVal)
         }
-
-        if (flush === "sync") {
-            cleanup = job
-        } else if (flush === "pre" || (flush !== "pre" && flush !== "sync")) {
-            cleanup = () => queueJob(job)
-        }
+        const _state = doWatchOptionInit(source, handler, flush, job)
+        _source = _state[0];
+        flush = _state[1]
+        cleanup = _state[2]
         getter = () => {
             const result = _source.map(cb => {
                 const rt = isReactiveArr(__toValue(cb()))
@@ -1181,7 +1294,13 @@
             return argumentsFlatShape(argumentsFlatShape(result))
         }
 
-        const _effectReactive = effectReactive(getter, () => cleanup(), { onTrack, onTrigger, deep, isRecollect: true })
+        const _effectReactive = effectReactive(getter, () => cleanup(), {
+            onTrack,
+            onTrigger,
+            deep,
+            isRecollect: true,
+            once
+        })
         if (immediate === true) {
             job()
         } else {
@@ -1207,6 +1326,33 @@
         return _target
     }
 
+    function triggerRef$(fn) {
+        if (!isFunction(fn)) {
+            log.warn1("fn is function")
+        }
+        let flag = false
+        const effect = new EffectReactive(fn, () => void 0);
+        effect.run()
+        runEffectDepsScheduler(effect, function () {
+            !flag && (flag = true)
+        })
+        effect.stop()
+        return flag
+    }
+
+    function runEffectDepsScheduler(effectDto, fn) {
+        if (!effectDto || !effectDto.deps) return
+        fn = isFunction(fn) ? fn : () => 0;
+        for (let deps of effectDto.deps) {
+            fn(deps);
+            for (let dep of deps) {
+                if (dep !== effectDto && dep.active) {
+                    dep.scheduler()
+                }
+            }
+        }
+    }
+
     function triggerRef(target) {
         if (__$isReactive(target)) {
             try {
@@ -1225,6 +1371,7 @@
         }
         return target
     }
+
     function recordEffectScope(effect, scope = activeEffectScope) {
         if (scope && scope.active) {
             scope.effects.push(effect);
@@ -1295,7 +1442,10 @@
 
 
     class RefClassModel extends RefClass {
-        effect = null
+        constructor(...args) {
+            super(...args)
+            this.effect;
+        }
         set value(v) {
             if (!is(v, this._value)) {
                 const oldVal = this._value
@@ -1329,12 +1479,8 @@
 
     const $$hooks = (function () {
         const _is = is
-        function collectTime() {
-            const _ = Date.now()
-            return () => Date.now() - _
-        }
+
         function createState() {
-            const _index = index
             let _gate = false
             try {
                 return def({
@@ -1343,7 +1489,6 @@
                     effects: [],
                     effectIndex: 0,
                     stateIndex: 0,
-                    _index: _index,
                     flag: true,
                 }, 'gate', {
                     get() {
@@ -1372,7 +1517,6 @@
                     }
                 })[0]
             } finally {
-                index++
             }
         }
         const def = (obj, key, options) => {
@@ -1390,6 +1534,7 @@
                 return tasks.find((cb) => cb === dep) || (() => { })
             }
             const state = createState()
+
             function _() {
                 return state
             }
@@ -1401,6 +1546,7 @@
             const state = {
                 initValue: target,
                 history: [target],
+                updateTime: null,
                 optionbs: options || null,
                 scheduler: null,
                 prevUpdateTime: null,
@@ -1413,7 +1559,16 @@
                 prev: prev || null,
                 next: null
             }
-            def(state, 'value', {
+            let _updateTime = null
+            def(state, "updateTime", {
+                get() {
+                    return _updateTime
+                },
+                set(v) {
+                    state.prevUpdateTime = _updateTime
+                    _updateTime = v
+                }
+            })[1](state, 'value', {
                 get() {
                     return state.history.at(-1)
                 }
@@ -1473,7 +1628,13 @@
         function renderDeef(node, treeNode, treeSub, callback) {
             let _node = node
             if (isObject(node)) {
-                _node = { ...node, originNode: node, props: { ...node.props } }
+                _node = {
+                    ...node,
+                    originNode: node,
+                    props: {
+                        ...node.props
+                    }
+                }
                 const props = _node.props
                 if (props && props.children) {
                     const _children = uniteArray(props.children)
@@ -1508,13 +1669,14 @@
             if (currentState) {
                 const _currentState = currentState
                 try {
+                    target = isFunction(target) ? target() : target
                     const currentSub = _currentState.stateIndex
                     const state = _currentState.state
                     let current = state[currentSub] || state[state.push(_createState(target, options)) - 1];
                     const _options = current.options || options
                     if (!('replaceFlag' in _options)) options.replaceFlag = false
                     current = _is(current.initValue, target) || !_options.replaceFlag ? current : (current.next = state.splice(currentSub, 1, _createState(target, options, current)) && state[currentSub]);
-                    current._scheduler = _options?.scheduler || _currentState.scheduler || currentScheduler;
+                    current._scheduler = (_options && _options.scheduler) || _currentState.scheduler || currentScheduler;
                     return [current.value, (current.scheduler || (current.scheduler = (value) => {
                         if (!_is(value, current.value)) {
                             current.add(value)
@@ -1554,10 +1716,11 @@
                         }
                         const oldDeps = uniteFunction(effects[currentSub].deps)();
                         const newDeps = uniteFunction(deps)();
-                        return oldDeps == null || oldDeps.length && (newDeps.length !== oldDeps?.length || oldDeps?.some((dep, index) => newDeps[index] !== dep))
+                        return oldDeps == null || oldDeps.length && (newDeps.length !== (oldDeps && oldDeps.length) || (oldDeps && oldDeps.some((dep, index) => newDeps[index] !== dep)))
                     })()) {
                         effects[currentSub].scheduler({
-                            callback, deps
+                            callback,
+                            deps
                         })
                     }
 
@@ -1659,7 +1822,9 @@
                 scheduler() { }
             })
             const _store = (typeof init === "function" && !isInit ? !setInit(true) && init(initialArg) : initialArg)
-            let [store, setStore] = createCurrentState(_store, { replaceFlag: false })
+            let [store, setStore] = createCurrentState(_store, {
+                replaceFlag: false
+            })
             const updateScheduler = useCallback((target) => {
                 setStore(reducer(store, target))
             })
@@ -1671,6 +1836,7 @@
             let oldProps = null
             let init = false
             const _callback = typeof callback === "function" ? callback : () => !void 0
+
             function _(props) {
                 let next = !!_callback()
                 if (next) {
@@ -1698,7 +1864,11 @@
         }
 
         function useRef(target) {
-            return $$hooks.useState({ current: target }, { replaceFlag: false })[0]
+            return $$hooks.useState({
+                current: target
+            }, {
+                replaceFlag: false
+            })[0]
         }
 
         return {
@@ -1722,7 +1892,9 @@
 
     $$hooks.useStateRef = function useStateRef(target) {
         try {
-            const [state] = $$hooks.useState(ref(target), { replaceFlag: false })
+            const [state] = $$hooks.useState(ref(target), {
+                replaceFlag: false
+            })
             stateRefTask.set(state, {
                 state: currentState,
                 index: currentState.stateIndex + 1
@@ -1731,7 +1903,9 @@
             $$hooks.useEffectSync(() => {
                 return watch(state, (nv, ov) => {
                     $useState(nv)
-                }, { flush: "sync" })
+                }, {
+                    flush: "sync"
+                })
             }, [state.value])
             return state
         } catch { }
@@ -1745,7 +1919,9 @@
         return isArray(target) ? target : [target];
     }
 
-    $$hooks.useEffectRef = function useEffectRef(callback, deps, options = { flush: 'pre' }) {
+    $$hooks.useEffectRef = function useEffectRef(callback, deps, options = {
+        flush: 'pre'
+    }) {
         const _deps = uniteFunction(deps)()
         const newDeps = _deps == null ? null : uniteArray(_deps).map(i => stateRefTask.has(i) ? toValue(i) : i);
         $$hooks[options.flush === 'pre' ? 'useEffectPre' : options.flush === "sync" ? 'useEffectSync' : 'useEffect'](() => {
@@ -1753,7 +1929,161 @@
         }, newDeps)
     }
 
+    function shallowReadonly(target) {
+        return readonly(target, true)
+    }
+
+    function freedEffectDeps(fn) {
+        if (isFunction(fn)) {
+            const effect = new EffectReactive(fn)
+            effect.run()
+            const deps = effect.deps
+            if (deps) {
+                for (let w of deps) {
+                    for (let ef of w) {
+                        if (ef === effect) continue;
+                        if (ef.deps && ef.deps.has(w)) {
+                            const flag = ef.deps.size === 1;
+                            ef.deps.delete(w)
+                            w.delete(ef)
+                            flag && ef.stop()
+                        }
+                    }
+                }
+            }
+            effect.stop()
+            return true
+        }
+        return log.warn1("fn is not function")
+    }
+
+    function doWatchSourceInit(source) {
+        let _source;
+        if (isFunction(source)) {
+            _source = [source]
+        } else if (!isReactive(source) && isArray(source)) {
+            _source = source.map(item => isFunction(item) ? item : () => item)
+        } else if (isReactive(source) || true) {
+            _source = [() => [source]]
+        }
+        return _source
+    }
+
+    function doWatchOptionInit(source, handler, flush, job) {
+        if (!flush) flush = "pre"
+        let cleanup;
+        if (flush === "sync") {
+            cleanup = job
+        } else if (flush === "pre" || (flush !== "pre" && flush !== "sync")) {
+            cleanup = () => queueJob(job)
+        }
+        return [doWatchSourceInit(source), flush, cleanup]
+    }
+
+    function doAsyncWatch(source, handler, {
+        immediate,
+        deep,
+        flush,
+        onTrack,
+        onTrigger,
+        once
+    } = options) {
+        if (ordinaryType(source)) {
+            return log.warn1("")
+        }
+        let _source, getter;
+        let cleanup, newVal, oldVal;
+        const job = async (flag) => {
+            oldVal = newVal || void 0
+            newVal = await _effectReactive.run();
+            !flag && handler(newVal, oldVal)
+        }
+        const _state = doWatchOptionInit(source, handler, flush, job)
+        _source = _state[0];
+        flush = _state[1];
+        cleanup = _state[2]
+        getter = () => {
+            return new Promise(async (resolve, reject) => {
+                const result = _source.map(async (cb, index) => {
+                    let rt1;
+                    try {
+                        rt1 = await cb()
+                    } catch (er) {
+                        rt1 = er
+                        log.warn1(`async watch -> argument(${index + 1}) reactive function -> reject(`, rt1, ')')
+                    }
+                    const rt = isReactiveArr(__toValue(rt1))
+                    return deep ? _reactiveToValueDeep(rt) : rt
+                })
+                for (let i = 0; i < result.length; i++) {
+                    result[i] = await result[i]
+                }
+                resolve(argumentsFlatShape(argumentsFlatShape(result)))
+            })
+        }
+
+        const _effectReactive = new effectAsyncReactive(getter, () => cleanup(), {
+            onTrack,
+            onTrigger,
+            deep,
+            isRecollect: true,
+            once
+        })
+        job(!immediate)
+
+        return () => _effectReactive.stop()
+    }
+
+    function effectAsyncReactive() {
+        const effect = new EffectAsyncReactive(arguments[0], arguments[1], {
+            ...(arguments[2] || {}),
+            init: false,
+        })
+        return {
+            run() {
+                return effect.run()
+            },
+            stop() {
+                effect.stop()
+            }
+        }
+    }
+
+    class EffectAsyncReactive extends EffectReactive {
+        async run() {
+            if (!this.active) return
+            if (this.isRecollect && this.deps) {
+                this.start()
+            }
+            this.parent = currentWatcherScope
+            try {
+                currentWatcherScope = this;
+                return await this.fu(this)
+            } finally {
+                currentWatcherScope = this.parent || null
+                this.parent = null
+                if (this.once && this.isImplement) {
+                    this.stop()
+                }
+            }
+        }
+    }
+
+    function watchAsync(source, cb, options) {
+        return doAsyncWatch(source, cb, options || {})
+    }
+
+    function watchAsyncEffect(source, options) {
+        return doAsyncWatch(source, () => void 0, options || {})
+    }
+
     const hooks = {
+        effectAsyncReactive,
+        watchAsync,
+        watchAsyncEffect,
+        doAsyncWatch,
+        freedEffectDeps,
+        shallowReadonly,
         computed,
         reactive,
         watchEffect,
@@ -1762,9 +2092,35 @@
         toRefs,
         toRef,
         readonly,
-        customRef, isReadonly, unReadonly,
-        shallowRef, toValues, isReactive, toValue, isRef, unref, isProxy, toRaw, markRaw, unMarkRaw, unProxy,
-        effectScope, nextTick, effectReactive, watchEffectSync, propsReactive, triggerRef, EffectScope, toRefsModel, configTool, isFunction, isObject, isArray, ...$$hooks
+        customRef,
+        isReadonly,
+        unReadonly,
+        shallowRef,
+        toValues,
+        isReactive,
+        toValue,
+        isRef,
+        unref,
+        isProxy,
+        toRaw,
+        markRaw,
+        unMarkRaw,
+        unProxy,
+        effectScope,
+        nextTick,
+        effectReactive,
+        watchEffectSync,
+        propsReactive,
+        triggerRef,
+        EffectScope,
+        toRefsModel,
+        configTool,
+        isFunction,
+        isObject,
+        isArray,
+        triggerRef$,
+        ...$$hooks,
+        EffectAsyncReactive
     }
     return hooks
 }))

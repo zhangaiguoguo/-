@@ -58,6 +58,14 @@
   flex: 1;
 }
 
+.login-box-hij .el-form-item .el-form-item_content input[name] {
+  height: 34px !important;
+}
+
+.login-box-hij .el-form-item .el-form-item_content #login-btn {
+  height: 34px !important;
+}
+
 .w-100 {
   width: 100% !important;
 }
@@ -103,10 +111,17 @@
   top: 2px;
 }
 
-.el-icon-pij svg {
+.el-icon-pij {
   height: 1em;
   width: 1em;
+  display: inline-flex;
 }
+
+.el-icon-pij svg {
+  height:100%;
+  width: 100%;
+}
+
 .el-loading-mask-hij {
   /* background-color: var(--el-mask-color); */
 }
@@ -204,9 +219,10 @@
   padding: 5px 0 12px 0;
 }
 
-.el-dialog-close-hij .el-dialog-close-btns > .btn + .btn {
+.el-dialog-close-hij .el-dialog-close-btns>.btn+.btn {
   margin-left: 14px;
 }
+
 button.el-button-none-plj {
   display: none !important;
 }
@@ -216,6 +232,7 @@ button.el-button-none-plj {
   margin-left: 4px;
   cursor: pointer;
 }
+
 .el-update-gij {
   width: 460px;
   height: 340px;
@@ -234,16 +251,19 @@ button.el-button-none-plj {
   color: #f56c6c;
   font-size: 12px;
 }
+
 .el-update-gij .el-update-header-gij {
   padding: 12px;
   box-shadow: 0 1px 2px #ccc;
   position: relative;
 }
+
 .el-update-gij .el-update-footer-gij {
   padding: 12px;
   box-shadow: 0 -1px 2px #ccc;
   position: relative;
 }
+
 .el-update-gij .el-update-header-gij .el-update-close-gij {
   padding: 0;
   position: absolute;
@@ -253,18 +273,22 @@ button.el-button-none-plj {
   outline: none !important;
   text-decoration: none;
 }
+
 .el-update-gij .el-update-content-gij {
   padding: 12px;
   height: 73%;
   overflow: hidden auto;
 }
+
 .el-update-gij .el-update-content-gij #el-update-content-input-gij {
   display: none;
 }
+
 .el-update-gij .el-update-content-gij .el-update-content-list-gij {
   list-style: none;
   margin-top: 12px;
 }
+
 .el-update-gij .el-update-content-gij .el-update-content-item-gij {
   width: 100%;
   height: auto;
@@ -274,26 +298,29 @@ button.el-button-none-plj {
   font-size: 14px;
   cursor: pointer;
 }
-.el-update-gij
-  .el-update-content-gij
-  .el-update-content-item-gij
-  + .el-update-content-item-gij {
+
+.el-update-gij .el-update-content-gij .el-update-content-item-gij+.el-update-content-item-gij {
   margin-top: 8px;
 }
+
 .el-update-gij .el-update-content-gij .el-update-content-item-gij:hover {
   background-color: var(--el-fill-color-light);
 }
-.el-update-gij .el-update-content-gij .el-update-content-item-gij:hover .name{
-        color: var(--el-color-primary);
-    cursor: pointer;
+
+.el-update-gij .el-update-content-gij .el-update-content-item-gij:hover .name {
+  color: var(--el-color-primary);
+  cursor: pointer;
 }
+
 .el-update-gij .el-update-content-item-content-gij {
   display: flex;
   align-items: center;
 }
+
 .el-update-gij .el-update-content-item-content-gij .el-icon-pij {
   height: 1em;
 }
+
 .el-update-gij .el-update-content-item-content-gij .name {
   padding: 0 4px;
   width: 90%;
@@ -302,6 +329,7 @@ button.el-button-none-plj {
   white-space: nowrap;
   transition: color var(--el-transition-duration);
 }
+
 .el-update-gij .el-update-content-item-content-gij .btn-close {
   position: absolute;
   right: 12px;
@@ -319,20 +347,41 @@ button.el-button-none-plj {
   z-index: 1;
   background: #fff;
 }
+
 .el-update-gij .el-update-content-btn-gij .tip {
   color: var(--el-color-warning);
   font-size: 12px;
   padding-left: 4px;
 }
+
 .el-update-gij .el-update-footer-gij {
   text-align: right;
 }
+
 .el-update-gij .el-update-footer-gij #el-update-btn-save {
   padding: 2px 16px;
   position: relative;
 }
 
-.login-box-hij .login-title-content-hij{
-    padding:6px 12px;
-    display: block;
+.login-box-hij .login-title-content-hij {
+  padding: 6px 12px;
+  display: block;
+}
+
+.el-form-item-password-cj-r .el-form-item_content {
+  position: relative;
+}
+
+.el-form-item-password-cj-r .el-form-item_content>.el-icon-pij {
+  position: absolute;
+  right: 4%;
+  top: 50%;
+  transform: translate(0, -50%);
+  cursor: pointer;
+  user-select: none;
+}
+div.gcxt-gpi-title-spl>h3{
+  text-align: center;
+  color: blue;
+  font-size: 26px;
 }

@@ -1,11 +1,11 @@
-
-*{
+* {
     padding: 0;
-    margin:0;
+    margin: 0;
 }
-body{
-}
-#app{
-    padding:12px;
-    width: fit-content;
+
+body {}
+
+#tsgc-jpi-app {
+    width: 240px;
+    height: 240px;
 }

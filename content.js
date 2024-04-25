@@ -60,29 +60,37 @@ const tastConclusionMaskLayer = createDOM($(document.body), function (props) {
     })
 })
 
-loginAlterHandler()
+// loginAlterHandler()
 
 obsDOM(obsTreeStr, (v) => {
-    v.children().each((i, v) => {
+    v.children().filter((index, v) => {
+        return !!$(v).find("td[aria-describedby=list_TestType]").text()
+    }).each((i, v) => {
         if (trMps.has(v)) return
         trMps.set(v, true)
         $(v).click(() => {
-            if (currentId.value && currentId.value !== $(v).attr('id')) {
+            const currentSampleId = $(v).attr('id')
+            if (currentId.value === currentSampleId) return
+            if (currentId.value && currentId.value !== currentSampleId) {
                 closeDislogHandle2()
                 return
             }
-            currentId.value = null
             pushStatusErrorTip.value = null
-            if (toValue(obsDOMTrMps)) toValue(obsDOMTrMps)();
-            currentId.value = $(v).attr('id')
+            currentId.value = currentSampleId
         })
     })
 });
 
-watch(currentId, v => {
+function releaseEffect() {
     obsDOMTrMps.value?.();
+    obsDOMTrMps2.value?.()
+}
+
+watch(currentId, v => {
+    releaseEffect()
     if (v) {
         obsDOMTrMps2.value = obsDOM(`div.taskMain div#LIMSTestReportApproveDetail>table tbody .childDiv table.resizabletable tbody`, function (v) {
+            obsDOMTrMps2.value()
             const tds = v.find('td>span')
             currentCYDNumber.value = findtdsValue2(tds, "抽样单号：")
             {
@@ -99,7 +107,6 @@ watch(currentId, v => {
         })
     }
 }, {
-    flush: 'sync'
 })
 
 function createButtonHook2() {
@@ -144,7 +151,6 @@ function getCurrentPushData() {
 function createButtonTSGC(root) {
     const btns = root.find('button#push-btn-gg-pl')
     btns.each((i, s) => {
-        if (i === btns.length - 1) return
         s.remove()
     })
     if (!root.find('button#push-btn-gg-pl').length && !pushStatusErrorTip.value) {
@@ -172,7 +178,7 @@ const createCloseDialog = createDOM($(document.body), function (props) {
     }, {
         cancel() {
             commontjs()
-            if (toValue(currentLoginStatusFlag)){
+            if (toValue(currentLoginStatusFlag)) {
                 pushCurrentData(0)
             }
             currentId.value = null

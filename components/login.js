@@ -8,23 +8,26 @@
                 default: () => $(`
                 <div class="login-box-hij">
                 <div class="login-title">
-                    <span class="login-title-content-hij">登录</span>
+                    <span class="login-title-content-hij"></span>
                     <a href="javascript:;" class="btn btn-link login-close-btn">
                         ${findIconHandlerTemplate('close')()}
                     </a>
                 </div>
+                <div class="gcxt-gpi-title-spl">
+                    <h3>国抽系统登录</h3>
+                </div>
                 <form id="login-form-options" class="el-form login-box-form form-inline box_content" action="/">
-                    <div class="el-form-item-g"></div>
                     <div class="form-group el-form-item">
                         <div class="el-form-item_content">
                             <input required type="text" class="form-control el-input w-100" id="account"
                                 name="account" placeholder="请输入账号"  value=${props.account || ""}>
                         </div>
                     </div>
-                    <div class="form-group el-form-item">
+                    <div class="form-group el-form-item el-form-item-password-cj-r">
                         <div class="el-form-item_content">
                             <input required type="password" class="form-control el-input w-100" id="password"
                                 name="password" placeholder="请输入密码" value=${props.password || ""}>
+                                ${findIconHandlerTemplate('View')()}
                         </div>
                     </div>
                     <div class="form-group el-form-item">
@@ -62,6 +65,18 @@
             })
             html.find("a.login-close-btn").click(() => {
                 emits.destroy()
+            })
+            html.find(".el-form-item-password-cj-r .el-form-item_content .el-icon-pij").click(function () {
+                const icon = $(this).attr('icon')
+                let node = null
+                if (icon === "View") {
+                    node = $(findIconHandlerTemplate('Hide')())
+                } else {
+                    node = $(findIconHandlerTemplate('View')())
+                }
+                this.replaceChild(node.children()[0], $(this).children()[0])
+                $(this).attr('icon', node.attr('icon'))
+                $(this).prev().attr('type',icon === "View" ? 'type' : 'password')
             })
             return html
         }
