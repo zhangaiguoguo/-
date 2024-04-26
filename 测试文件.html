@@ -8,78 +8,6 @@
 </head>
 
 <body>
-    <div id="taskMain" style="display: none;">
-        <div>
-            <div class="closeTaskBot">
-                <span onclick="this.parentNode.parentNode.parentNode.remove()">x</span>
-            </div>
-            <div>
-                <ul id="_sys_TabMain">
-                    <div class="reportListPages">
-                        <button>打印</button>
-                    </div>
-                </ul>
-                <div id="LIMSTestReportApproveDetail">
-                    <table id="${w.id}">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <div class="childDiv">
-                                        <table class="resizabletable" id="${w.id}">
-                                            <tbody>
-                                                <tr>
-                                                    <td>
-                                                        <span>抽样单号：</span>
-                                                    </td>
-                                                    <td>
-                                                        <div class="btn-group disable" disabled="disabled"><input
-                                                                type="text" class="_sCtFs" disabled="disabled"
-                                                                readonly="readonly" style="width: 215px;"
-                                                                value="cz1331123232ab12s112"></div>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="text-align: right; border: none;"><span
-                                                            style="width: 200px; text-align: right;">检测类型：</span></td>
-                                                    <td style="text-align: left; border: none;" colspan="3">
-                                                        <div class="btn-group grid-group disable" disabled="disabled"
-                                                            style="width: 100%;"><input name="" value="食品安全监督抽检"
-                                                                class="inputValue _sCtFs" type="text" value=""
-                                                                disabled="disabled" readonly="readonly"
-                                                                style="width: 540px;"><button name="" type="button"
-                                                                class="selectSearchlist" readonly="readonly"
-                                                                disabled="disabled"></button>
-                                                            <ul class="valueList" style="display: none;">
-                                                                <table id="datacomplexsel_tb" width="100%" border="0"
-                                                                    cellspacing="0" cellpadding="0">
-                                                                    <tbody>
-                                                                        <tr class="title">
-                                                                            <td>客户编号</td>
-                                                                            <td>客户名称</td>
-                                                                        </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                            </ul>
-                                                        </div>
-                                                    </td>
-                                                    <td style="text-align: left; display: none; border: none;"
-                                                        colspan="1" rowspan="1" rootrowindex="9" rootcellindex="1">
-                                                        &nbsp;</td>
-                                                    <td style="text-align: left; display: none; border: none;"
-                                                        colspan="1" rowspan="1" rootrowindex="9" rootcellindex="1">
-                                                        &nbsp;</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
     <br />
     <div contenteditable style="border: 1px solid #ccc;padding:12px;"></div>
     <br />
@@ -95,9 +23,83 @@
             </div>
         </div>
     </div>
+    <div class="main">
+        <div class="taskMain" id="taskMain" style="display: none;">
+            <div>
+                <div class="closeTaskBot">
+                    <span onclick="this.parentNode.parentNode.parentNode.style.display='none'">x</span>
+                </div>
+                <div>
+                    <ul id="_sys_TabMain">
+                        <div class="reportListPages">
+                            <button>打印</button>
+                        </div>
+                    </ul>
+                    <div id="LIMSTestReportApproveDetail">
+                        <table id="${w.id}">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="childDiv">
+                                            <table class="resizabletable" id="${w.id}">
+                                                <tbody>
+                                                    <tr>
+                                                        <td>
+                                                            <span class="resizabletable">抽样单号：</span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="btn-group disable" disabled="disabled"><input
+                                                                    type="text" class="_sCtFs cyd-input" disabled="disabled"
+                                                                    readonly="readonly" style="width: 215px;"
+                                                                    value="cz1331123232ab12s112"></div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="text-align: right; border: none;"><span
+                                                                style="width: 200px; text-align: right;">检测类型：</span></td>
+                                                        <td style="text-align: left; border: none;" colspan="3">
+                                                            <div class="btn-group grid-group disable" disabled="disabled"
+                                                                style="width: 100%;"><input name="" value="食品安全监督抽检"
+                                                                    class="inputValue _sCtFs" type="text" value=""
+                                                                    disabled="disabled" readonly="readonly"
+                                                                    style="width: 540px;"><button name="" type="button"
+                                                                    class="selectSearchlist" readonly="readonly"
+                                                                    disabled="disabled"></button>
+                                                                <ul class="valueList">
+                                                                    <table id="datacomplexsel_tb" width="100%" border="0"
+                                                                        cellspacing="0" cellpadding="0">
+                                                                        <tbody>
+                                                                            <tr class="title">
+                                                                                <td>客户编号</td>
+                                                                                <td>客户名称</td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </ul>
+                                                            </div>
+                                                        </td>
+                                                        <td style="text-align: left; display: none; border: none;"
+                                                            colspan="1" rowspan="1" rootrowindex="9" rootcellindex="1">
+                                                            &nbsp;</td>
+                                                        <td style="text-align: left; display: none; border: none;"
+                                                            colspan="1" rowspan="1" rootrowindex="9" rootcellindex="1">
+                                                            &nbsp;</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 <script>
-
+    let done = false
     function fn() {
         let html = ""
         for (let w = 0; w < Math.ceil(Math.random() * 50); w++) {
@@ -107,23 +109,16 @@
         let index = 0
         for (let w of document.querySelector("#list tbody").childNodes) {
             w.ondblclick = function () {
-                const alertDOM = document.querySelector("#el-dialog")
-                if (alertDOM) alertDOM.remove()
-                const el = document.createElement('div')
-                el.innerHTML = ccc(w, index)
-                el.querySelector('#taskMain').style.display = "block";
-                el.id = "el-dialog"
-                el.querySelector('#taskMain').className = "taskMain"
-                document.body.appendChild(el)
+                done = true
+                document.querySelector('#taskMain').style.display = "block";
                 index++
             }
+            w.addEventListener('click', function () {
+                document.querySelector('#taskMain').querySelector('input.cyd-input').value = w.querySelector('td[aria-describedby=list_SamplingNO]')?.innerHTML
+            })
         }
     }
     fn()
-
-    function ccc(w, index) {
-        return document.querySelector('#taskMain').outerHTML
-    }
 
 </script>
 

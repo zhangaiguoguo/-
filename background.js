@@ -18,7 +18,8 @@ class NationalPushAPI {
                 allItems: message.allItems,
                 username: message.nickname,
                 password: message.password,
-                captcha: message.captcha
+                captcha: message.captcha,
+                uid: message.uuid
             }),
             headers: { 'Content-Type': 'application/json' }
         }).then(res => res.json()).then(res => {
@@ -44,7 +45,8 @@ class NationalPushAPI {
                 items: message.items,
                 allItems: message.allItems,
                 nickname: message.account,
-                password: message.password
+                password: message.password,
+                uid: message.uuid
             }),
             headers: { 'Content-Type': 'application/json' }
         }).then(res => res.json()).then(res => {
@@ -64,22 +66,27 @@ class NationalPushAPI {
 
     //推送
     pushStatus(message) {
-        const files = message.files
-        const formData = new FormData()
-        if (files) {
-            for (let w = 0; w < files.length; w++) {
-                formData.append('file', dataURLtoBlob(files[w]))
-            }
+        // const files = message.files
+        // const formData = new FormData()
+        // if (files) {
+        //     for (let w = 0; w < files.length; w++) {
+        //         formData.append('file', dataURLtoBlob(files[w]))
+        //     }
+        // }
+        // formData.append("sampleNumber", message.sampleNumber)
+        // formData.append("sampleNumber", message.sampleNumber)
+        // formData.append("id", message.id)
+        // formData.append("pushCommand", !!message.flag)
+        // formData.append("processId", message.processId)
+        // formData.append("uid", message.uuid)
+        const data = {
+            ...message,
+            pushCommand: !!message.flag
         }
-        formData.append("sampleNumber", message.sampleNumber)
-        formData.append("id", message.id)
-        formData.append("pushCommand", message.flag)
-        formData.append("processId", message.processId)
-        formData.append("uuid", message.uuid)
         fetch(loginstatusUrl + "/pushdata", {
             method: "POST",
-            body: formData,
-            headers: { 'Content-Type': 'multipart/form-data' }
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'multipart/json' }
         }).then(res => res.json()).then(res => {
             sendMessage({
                 type: "PUSHSTATUSRESPONSE", message: {
@@ -174,7 +181,7 @@ function setCurrentDataId(id) {
 const loginstatusUrl = ("http://labhub-fsp.cpolar.cn")
 
 const nationalPushAPI = new NationalPushAPI({
-    baseUrl : loginstatusUrl
+    baseUrl: loginstatusUrl
 })
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {

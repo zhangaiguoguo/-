@@ -21,7 +21,8 @@ window.globalState = {
     currentLoginStatus: ref(null),
     currentLoginStatusErrorTip: ref(null),
     currentLoginStatusFlag: ref(false),
-    currentDataIsPushGC: ref(false)
+    currentDataIsPushGC: ref(false),
+    currentUuid: ref(null)
 }
 
 window.components = []
@@ -152,6 +153,15 @@ window.unzip = (b64Data) => {
     return result;
 };
 
+{
+    $.fn.hidden = function () {
+        if (this.length) {
+            return getComputedStyle(this[0]).display !== "none"
+        }
+        return false
+    }
+}
+
 
 function observerNode(obsTreeStr, callback) {
     let id = null;
@@ -204,10 +214,79 @@ function nationalPumpPush() {
     const row = trCurrentDataMps.get(currentId.value)
     if (row.info[keys[0]] === "不合格") {
         tastConclusionMaskLayer()
-    } else if ((row.info[keys[1]]||"").indexOf("Q/") !== -1) {
+    } else if ((row.info[keys[1]] || "").indexOf("Q/") !== -1) {
         createUpLoadFileNode()
     } else {
         pushCurrentData()
+    }
+}
+
+
+const queue = []
+const JOB_KEY = Symbol("job_id")
+let isFlushing;
+
+function queueJob(job, ...args) {
+    const i = queue.findIndex(i => i === job || i[JOB_KEY] === job[JOB_KEY])
+    job.args = args
+    if (i === -1) {
+        job[JOB_KEY] = Date.now() + queue.length + 1
+        queue.push(job);
+    } else
+        queue.splice(i, 1, job);
+
+    queueFlush()
+}
+
+const resolvedPromise = Promise.resolve()
+
+function queueFlush() {
+    if (!isFlushing) {
+        currentFlushPromise = resolvedPromise.then(flushJobs)
+    }
+}
+
+function callWithErrorHandling(fn, args) {
+    let res;
+    try {
+        res = args ? fn(...args) : fn();
+    } catch (err) {
+    }
+    return res;
+}
+
+function flushJobs(seen) {
+    isFlushing = true
+    seen = seen || new Map()
+    const check = (job) => checkRecursiveUpdates(seen, job);
+    try {
+        for (let w = 0; w < queue.length; w++) {
+            const cb = queue[w]
+            if (check(cb)) {
+                continue;
+            }
+            queue.splice(w, 1)
+            w--
+            callWithErrorHandling(cb, cb.args)
+        }
+    } finally {
+        queue.length = 0
+        isFlushing = false
+    }
+}
+
+const RECURSION_LIMIT = 100;
+
+function checkRecursiveUpdates(seen, fn) {
+    if (!seen.has(fn)) {
+        seen.set(fn, 1);
+    } else {
+        const count = seen.get(fn);
+        if (count > RECURSION_LIMIT) {
+            return true;
+        } else {
+            seen.set(fn, count + 1);
+        }
     }
 }
 
@@ -216,8 +295,17 @@ function getLoginStatus() {
     chrome.runtime.sendMessage({
         type: "LOGINSTATUS", message: {
             ...globalState.trCurrentDataMps.get(toValue(globalState.currentId)),
-            ...getLoginInfo()
+            ...getLoginInfo(),
+            uuid: globalState.currentUuid.value
         }
+    })
+}
+
+function delay(time = 20) {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve()
+        }, time)
     })
 }
 
@@ -231,12 +319,14 @@ function pushCurrentData(status = 1, options = {}) {
     globalState.pushStatusLoading.value = true
     chrome.runtime.sendMessage({
         type: "PUSHSTATUS", message: {
+            ...trCurrentDataMps.get(currentId.value),
             sampleNumber: toValue(globalState.currentCYDNumber), id: toValue(globalState.currentId),
             flag: status,
             files: options.files,
             processId: toValue(globalState.currentUuid)
         }
     })
+    currentId.value = null
     return
     if (status) {
     } else {

@@ -1,6 +1,6 @@
 {
     let htmlProxy = null
-    const { currentVerificationCode, pushStatusLoading, trCurrentDataMps, currentId, pushStatusErrorTip } = window.globalState;
+    const { currentVerificationCode, pushStatusLoading, trCurrentDataMps, currentId, pushStatusErrorTip, currentUuid } = window.globalState;
     window.components.push({
         name: "login",
         render(props, emits) {
@@ -76,7 +76,7 @@
                 }
                 this.replaceChild(node.children()[0], $(this).children()[0])
                 $(this).attr('icon', node.attr('icon'))
-                $(this).prev().attr('type',icon === "View" ? 'type' : 'password')
+                $(this).prev().attr('type', icon === "View" ? 'type' : 'password')
             })
             return html
         }
@@ -103,7 +103,8 @@
                         info: message.info,
                         password: formData.get('password'),
                         nickname: formData.get('account'),
-                        captcha: formData.get('verificationCode')
+                        captcha: formData.get('verificationCode'),
+                        uuid: currentUuid.value|null,
                     }
                 })
                 setLoginInfo(formData.get('account'), formData.get('password'))
