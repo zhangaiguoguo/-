@@ -11,7 +11,7 @@
     <div id="taskMain" style="display: none;">
         <div>
             <div class="closeTaskBot">
-                <span>x</span>
+                <span onclick="this.parentNode.parentNode.parentNode.remove()">x</span>
             </div>
             <div>
                 <ul id="_sys_TabMain">
@@ -80,9 +80,9 @@
             </div>
         </div>
     </div>
-    <br/>
+    <br />
     <div contenteditable style="border: 1px solid #ccc;padding:12px;"></div>
-    <br/>
+    <br />
     <div class="main">
         <button onclick="fn()">点击</button>
         <div class="content clear">
@@ -101,7 +101,7 @@
     function fn() {
         let html = ""
         for (let w = 0; w < Math.ceil(Math.random() * 50); w++) {
-            html += `<tr class='ui-widget-content tr-${w + 1}' id="data-id-${w + 1}"><td>样品${w + 1}</td></tr>`
+            html += `<tr class='ui-widget-content tr-${w + 1}' id="data-id-${w + 1}"><td>样品${w + 1}</td>${(w + 1) % 2 ? `<td aria-describedby=list_SamplingNO>CY13243434${w + 1}</td>` : ''}</tr>`
         }
         document.querySelector("#list tbody").innerHTML = html
         let index = 0

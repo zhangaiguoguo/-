@@ -80,7 +80,7 @@ export function sendMessage(message, callback, errorCallback) {
         active: true,
         currentWindow: true
     }, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, message).then((...args) => {
+        chrome.tabs.sendMessage(tabs[0]?.id, message).then((...args) => {
             callback && callback(...args)
         }).catch(err => {
             errorCallback && errorCallback(err)

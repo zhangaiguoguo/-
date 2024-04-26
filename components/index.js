@@ -12,6 +12,7 @@ window.globalState = {
     obsDOMTrMps: ref(null),
     obsDOMTrMps2: ref(null),
     currentId: ref(null),
+    prevCurrentId: ref(null),
     currentCYDNumber: ref(null),
     currentFuncStatus: ref(null),
     currentTaskMainRootEl: ref(null),
@@ -60,7 +61,7 @@ function findtdsValue2(tds, k) {
     return tds.filter((i, e) => $(e).html() === k).parent().next().find(".btn-group ._sCtFs").val() || ""
 }
 
-function createDOM(el, callback) {
+function createComponent(el, callback) {
     const createDOMATTRREFS = globalState.createDOMATTRREFS
     let $el = null
     let render = null
@@ -152,7 +153,7 @@ window.unzip = (b64Data) => {
 };
 
 
-function obsDOM(obsTreeStr, callback) {
+function observerNode(obsTreeStr, callback) {
     let id = null;
     let flag = true
     let getNum = 0
@@ -189,7 +190,7 @@ function obsDOM(obsTreeStr, callback) {
     }
 }
 
-const keys = ['TastConclusion', 'TaskValue']
+const keys = ['TastConclusion', 'TestBasis']
 
 function nationalPumpPush() {
     globalState.currentDataIsPushGC.value = false
@@ -203,7 +204,7 @@ function nationalPumpPush() {
     const row = trCurrentDataMps.get(currentId.value)
     if (row.info[keys[0]] === "不合格") {
         tastConclusionMaskLayer()
-    } else if (row.info[keys[1]].indexOf("Q/") !== -1) {
+    } else if ((row.info[keys[1]]||"").indexOf("Q/") !== -1) {
         createUpLoadFileNode()
     } else {
         pushCurrentData()
@@ -232,7 +233,17 @@ function pushCurrentData(status = 1, options = {}) {
         type: "PUSHSTATUS", message: {
             sampleNumber: toValue(globalState.currentCYDNumber), id: toValue(globalState.currentId),
             flag: status,
-            files: options.files
+            files: options.files,
+            processId: toValue(globalState.currentUuid)
         }
     })
+    return
+    if (status) {
+    } else {
+        chrome.runtime.sendMessage({
+            type: "CANCELPUSH", message: {
+                uuid: toValue(globalState.currentUuid),
+            }
+        })
+    }
 }
