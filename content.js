@@ -1,4 +1,4 @@
-const { alreadyPushedData, pushStatusLoading, pushStatusErrorTip, buttonsRef, obsTreeStr, obsDOMTrMps, obsDOMTrMps2, trCurrentDataMps, trMps, currentId, currentCYDNumber, currentFuncStatus, currentTaskMainRootEl, currentVerificationCode, currentLoginStatus, currentLoginStatusErrorTip, currentLoginStatusFlag, currentDataIsPushGC, prevCurrentId, currentUuid } = window.globalState;
+const { alreadyPushedData, pushStatusLoading, pushStatusErrorTip, buttonsRef, obsTreeStr, obsDOMTrMps, obsDOMTrMps2, trCurrentDataMps, trMps, currentId, currentCYDNumber, currentFuncStatus, currentTaskMainRootEl, currentVerificationCode, currentLoginStatus, currentLoginStatusErrorTip, currentLoginStatusFlag, currentDataIsPushGC, prevCurrentId, currentUuid, currentSampleFlag } = window.globalState;
 
 const loginAlterHandler = createComponent($(document.body), function (props) {
     currentLoginStatus.value = props.destroy
@@ -21,6 +21,7 @@ async function parseReadAsDataURL(list) {
         })
         l.push(result)
     }
+    return l
 }
 
 const createUpLoadFileNode = createComponent($(document.body), function (props) {
@@ -28,16 +29,17 @@ const createUpLoadFileNode = createComponent($(document.body), function (props) 
     }, {}, {
         destroy: props.destroy,
         async submit(options) {
-            pushStatusLoading.value = limittimeFile
+            pushStatusLoading.value = true
             try {
-                var fileUrls = await parseReadAsDataURL(options.files)
+                var fileUrls = await parseReadAsDataURL(options.files || [])
                 var fileUrls2 = await parseReadAsDataURL(options.files)
             } catch (er) {
 
             }
             pushCurrentData(1, {
                 files: fileUrls,
-                limittimeFile: fileUrls2
+                limittimeFile: fileUrls2,
+                enterpriseStandardName: options.enterpriseStandardName
             })
             pushStatusLoading.value = false
             props.destroy()
@@ -57,7 +59,12 @@ const tastConclusionMaskLayer = createComponent($(document.body), function (prop
                 }
             }, {
                 cancel() {
-                    pushCurrentData()
+                    currentSampleFlag.value[0] = false
+                    if (toValue(currentSampleFlag)[1]) {
+                        createUpLoadFileNode()
+                    } else {
+                        pushCurrentData()
+                    }
                 },
                 confirm() {
                     createUpLoadFileNode()
@@ -307,7 +314,6 @@ const ResponseStatus = {
         }
     },
     LOGINRESPONSE(message) {
-        pushStatusLoading.value = false
         currentLoginStatus.value?.()
         if (message.code === 200) {
             currentLoginStatusFlag.value = message.data.status
@@ -324,6 +330,7 @@ const ResponseStatus = {
             loginStatusError()
             currentLoginStatusFlag.value = false
         }
+        pushStatusLoading.value = false
     },
     GETTAGSRESPONSE(message) {
         if (message.status) {

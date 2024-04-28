@@ -218,16 +218,19 @@ function nationalPumpPush(currentSampleID) {
         return getLoginStatus()
     }
     const row = trCurrentDataMps.get(currentSampleID)
-    const dones = [row.info[keys[0]] === "不合格", (row.info[keys[1]] || "").indexOf("Q/") !== -1];
+    const dones = [1, 2] || [row.info[keys[0]] === "不合格", (row.info[keys[1]] || "").indexOf("Q/") !== -1];
+    globalState.currentSampleFlag.value = dones
     if (dones[0]) {
         tastConclusionMaskLayer()
     } else if (dones[1]) {
         createUpLoadFileNode()
     }
 
-    pushCurrentData(1, {
-        id: currentSampleID
-    })
+    if (!dones.some(ii => !!ii === true)) {
+        pushCurrentData(1, {
+            id: currentSampleID
+        })
+    }
 }
 
 const queue = []
@@ -300,6 +303,7 @@ function checkRecursiveUpdates(seen, fn) {
 
 
 function getLoginStatus() {
+    globalState.pushStatusLoading.value = true
     chrome.runtime.sendMessage({
         type: "LOGINSTATUS", message: {
             ...globalState.trCurrentDataMps.get(toValue(globalState.currentId)),
@@ -320,23 +324,23 @@ function delay(time = 20) {
 
 
 function pushCurrentData(status = 1, options = {}) {
-    const currentId = options.id
+    const id = options.id || currentId.value
     if (status == 1) {
-        alreadyPushedData.set(currentId)
-        console.log("当前推送数据：", trCurrentDataMps.get(currentId), toValue(currentCYDNumber));
+        alreadyPushedData.set(id)
+        console.log("当前推送数据：", trCurrentDataMps.get(id), toValue(currentCYDNumber));
         globalState.pushStatusLoading.value = true
         chrome.runtime.sendMessage({
             type: "PUSHSTATUS", message: {
-                ...trCurrentDataMps.get(currentId),
+                ...trCurrentDataMps.get(id),
                 sampleNumber: toValue(globalState.currentCYDNumber), id: toValue(globalState),
                 flag: status,
                 files: options.files,
                 limittimeFile: options.limittimeFile,
+                enterpriseStandardName: options.enterpriseStandardName,
                 processId: toValue(globalState.currentUuid)
             }
         })
-        currentId.value = null
     } else {
-        alreadyPushedData.delete(currentId)
+        alreadyPushedData.delete(id)
     }
 }
