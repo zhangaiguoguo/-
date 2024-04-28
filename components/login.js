@@ -104,13 +104,13 @@
                         password: formData.get('password'),
                         nickname: formData.get('account'),
                         captcha: formData.get('verificationCode'),
-                        uuid: currentUuid.value|null,
+                        uuid: currentUuid.value || null,
                     }
                 })
                 setLoginInfo(formData.get('account'), formData.get('password'))
             } else {
                 emits.destroy()
-                pushStatusErrorTip.value = "操作异常，为获取到当前数据的信息，请重新操作一下"
+                pushStatusErrorTip.value = "操作异常，未获取到当前数据的信息，请重新操作一下"
                 removeLoginInfo()
             }
         }

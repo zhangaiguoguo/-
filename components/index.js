@@ -22,8 +22,14 @@ window.globalState = {
     currentLoginStatusErrorTip: ref(null),
     currentLoginStatusFlag: ref(false),
     currentDataIsPushGC: ref(false),
-    currentUuid: ref(null)
+    currentUuid: ref(null),
+    notificationPermissionFlag: ref(false),
+    currentSampleFlag: ref([1, 1])
 }
+
+Notification.requestPermission().then(function (permission) {
+    globalState.notificationPermissionFlag.value = permission === "granted"
+});
 
 window.components = []
 
@@ -202,25 +208,27 @@ function observerNode(obsTreeStr, callback) {
 
 const keys = ['TastConclusion', 'TestBasis']
 
-function nationalPumpPush() {
+function nationalPumpPush(currentSampleID) {
     globalState.currentDataIsPushGC.value = false
-    if (!trCurrentDataMps.has(currentId.value)) {
+    if (!trCurrentDataMps.has(currentSampleID)) {
         return pushStatusErrorTip.value = "数据获取异常，无法推送"
     }
     if (!toValue(globalState.currentLoginStatusFlag)) {
         globalState.currentDataIsPushGC.value = true
         return getLoginStatus()
     }
-    const row = trCurrentDataMps.get(currentId.value)
-    if (row.info[keys[0]] === "不合格") {
+    const row = trCurrentDataMps.get(currentSampleID)
+    const dones = [row.info[keys[0]] === "不合格", (row.info[keys[1]] || "").indexOf("Q/") !== -1];
+    if (dones[0]) {
         tastConclusionMaskLayer()
-    } else if ((row.info[keys[1]] || "").indexOf("Q/") !== -1) {
+    } else if (dones[1]) {
         createUpLoadFileNode()
-    } else {
-        pushCurrentData()
     }
-}
 
+    pushCurrentData(1, {
+        id: currentSampleID
+    })
+}
 
 const queue = []
 const JOB_KEY = Symbol("job_id")
@@ -309,31 +317,26 @@ function delay(time = 20) {
     })
 }
 
+
+
 function pushCurrentData(status = 1, options = {}) {
+    const currentId = options.id
     if (status == 1) {
-        alreadyPushedData.set(currentId.value,)
-        console.log("当前推送数据：", trCurrentDataMps.get(currentId.value), toValue(currentCYDNumber));
-    } else {
-        alreadyPushedData.delete(currentId.value)
-    }
-    globalState.pushStatusLoading.value = true
-    chrome.runtime.sendMessage({
-        type: "PUSHSTATUS", message: {
-            ...trCurrentDataMps.get(currentId.value),
-            sampleNumber: toValue(globalState.currentCYDNumber), id: toValue(globalState.currentId),
-            flag: status,
-            files: options.files,
-            processId: toValue(globalState.currentUuid)
-        }
-    })
-    currentId.value = null
-    return
-    if (status) {
-    } else {
+        alreadyPushedData.set(currentId)
+        console.log("当前推送数据：", trCurrentDataMps.get(currentId), toValue(currentCYDNumber));
+        globalState.pushStatusLoading.value = true
         chrome.runtime.sendMessage({
-            type: "CANCELPUSH", message: {
-                uuid: toValue(globalState.currentUuid),
+            type: "PUSHSTATUS", message: {
+                ...trCurrentDataMps.get(currentId),
+                sampleNumber: toValue(globalState.currentCYDNumber), id: toValue(globalState),
+                flag: status,
+                files: options.files,
+                limittimeFile: options.limittimeFile,
+                processId: toValue(globalState.currentUuid)
             }
         })
+        currentId.value = null
+    } else {
+        alreadyPushedData.delete(currentId)
     }
 }

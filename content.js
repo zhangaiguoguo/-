@@ -9,36 +9,44 @@ const loginAlterHandler = createComponent($(document.body), function (props) {
     })
 })
 
+async function parseReadAsDataURL(list) {
+    let l = []
+    for await (let file of list) {
+        const reader = new FileReader()
+        reader.readAsDataURL(file)
+        const result = await new Promise((resolve, reject) => {
+            reader.onload = ({ target: { result } }) => {
+                resolve(result)
+            }
+        })
+        l.push(result)
+    }
+}
+
 const createUpLoadFileNode = createComponent($(document.body), function (props) {
     return findComponentTemplate('elUpdateFile')({
     }, {}, {
         destroy: props.destroy,
-        async submit(fileList) {
-            const fileUrls = []
-            pushStatusLoading.value = true
+        async submit(options) {
+            pushStatusLoading.value = limittimeFile
             try {
-                for await (let file of fileList) {
-                    const reader = new FileReader()
-                    reader.readAsDataURL(file)
-                    const result = await new Promise((resolve, reject) => {
-                        reader.onload = ({ target: { result } }) => {
-                            resolve(result)
-                        }
-                    })
-                    fileUrls.push(result)
-                }
+                var fileUrls = await parseReadAsDataURL(options.files)
+                var fileUrls2 = await parseReadAsDataURL(options.files)
             } catch (er) {
 
             }
-            pushStatusLoading.value = false
             pushCurrentData(1, {
-                files: fileUrls
+                files: fileUrls,
+                limittimeFile: fileUrls2
             })
+            pushStatusLoading.value = false
             props.destroy()
             props.refresh()
         }
     })
 })
+
+// createUpLoadFileNode()
 
 const tastConclusionMaskLayer = createComponent($(document.body), function (props) {
     return findComponentTemplate('maskLayer')({}, {
@@ -78,7 +86,6 @@ async function triggerSampleData(v) {
         return
     }
     const currentSampleId = $(v).attr('id')
-    console.log(currentSampleId, $(v).find("td[aria-describedby=list_SamplingNO]").text());
     if (currentId.value === currentSampleId) return
     if (currentId.value && currentId.value !== currentSampleId) {
         await new Promise((resolve) => {
@@ -123,6 +130,8 @@ watch(currentId, v => {
                 }
             }
         })
+    } else {
+        destroyTSGCElements()
     }
 }, {
 })
@@ -204,21 +213,20 @@ const createCloseDialog = createComponent($(document.body), function (props) {
     }, {
         cancel() {
             if (toValue(currentLoginStatusFlag)) {
-                pushCurrentData(0)
+                // pushCurrentData(0)
             }
             commontjs()
         },
         confirm() {
-            nationalPumpPush()
+            nationalPumpPush(toValue(currentId))
             commontjs()
         },
         destroy: props.destroy
     }))
     function commontjs() {
+        currentId.value = null
         if (props.props.callback) {
             props.props.callback()
-        } else {
-            destroyTSGCElements()
         }
     }
     const html = $(findComponentTemplate('maskLayer')({}, {
@@ -234,17 +242,35 @@ function resize() {
     currentId.value = null
 }
 
-function closeDislogHandle2(arg) {
-    if (!alreadyPushedData.has(currentId.value) && toValue(currentFuncStatus))
+function closeDislogHandle2(arg, id = currentId.value) {
+    const reslove = typeof arg === "function" ? arg : null
+    if (!alreadyPushedData.has(id)) {
         createCloseDialog({
-            callback: typeof arg === "function" ? arg : null
+            callback: reslove
         })
+    } else {
+        reslove?.()
+    }
+}
+
+function notification(message) {
+    message = typeof message === "object" && message !== null ? message : { message: message }
+    if (typeof Notification && toValue(globalState.notificationPermissionFlag)) {
+        if (Notification.permission === "granted") {
+            var notification = new Notification("推送提醒", { body: message.message });
+            notification.onclick = function () {
+                chrome.runtime.sendMessage({ type: "GETTAGS" });
+            }
+        }
+    } else {
+
+    }
 }
 
 const ResponseStatus = {
     RESPONSECOMPLETE(message) {
         trCurrentDataMps.set(currentId.value, message)
-        getLoginStatus()
+        pushStatusLoading.value = false
     },
     RESPONSECOMPLETEERROR(message) {
         pushStatusErrorTip.value = message
@@ -261,7 +287,7 @@ const ResponseStatus = {
             } else {
                 if (toValue(currentDataIsPushGC)) {
                     currentUuid.value = message.data.processId
-                    nationalPumpPush()
+                    nationalPumpPush(toValue(currentId))
                 }
             }
         } else {
@@ -272,6 +298,7 @@ const ResponseStatus = {
         pushStatusLoading.value = false
         if (message.code === 200) {
             if (message.data.status) {
+                notification("数据推送成功")
                 return
             }
         } else {
@@ -287,7 +314,7 @@ const ResponseStatus = {
             if (message.data.status) {
                 currentUuid.value = message.data.processId
                 if (toValue(currentDataIsPushGC)) {
-                    nationalPumpPush()
+                    nationalPumpPush(toValue(currentId.value))
                 }
             } else {
                 currentVerificationCode.value = message.data.data || message.data.value
@@ -296,6 +323,11 @@ const ResponseStatus = {
         } else {
             loginStatusError()
             currentLoginStatusFlag.value = false
+        }
+    },
+    GETTAGSRESPONSE(message) {
+        if (message.status) {
+        } else {
         }
     }
 }
@@ -319,12 +351,15 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         case "LOGINRESPONSE":
             ResponseStatus.LOGINRESPONSE(message)
             break
+        case "GETTAGSRESPONSE":
+            ResponseStatus.GETTAGSRESPONSE(message)
+            break
 
     }
 });
 
 function loginStatusError() {
-    currentLoginStatusErrorTip.value = "请求异常，重新操作一下"
+    currentLoginStatusErrorTip.value = "登录异常，重新操作一下"
     removeLoginInfo()
     loginAlterHandler()
 }

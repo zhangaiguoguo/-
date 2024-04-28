@@ -1,6 +1,6 @@
 {
 
-    const { pushStatusLoading, pushStatusErrorTip, buttonsRef } = window.globalState;
+    const { pushStatusLoading, pushStatusErrorTip, buttonsRef, currentLoginStatusFlag } = window.globalState;
     window.components.push({
         name: "pushButton",
         render(props, slots = {}, emits = {}) {
@@ -30,10 +30,11 @@
             html.find('button').attr('disabled', loading.value)
             $(html).click(({ target }) => {
                 if ($(target).attr(buttonsRef[0]) !== void 0) {
-                    nationalPumpPush();
+                    currentLoginStatusFlag.value = false
+                    nationalPumpPush(toValue(currentId));
                 } else if ($(target).attr(buttonsRef[1]) !== void 0) {
                     emits.update()
-                }else if ($(target).attr(buttonsRef[2]) !== void 0){
+                } else if ($(target).attr(buttonsRef[2]) !== void 0) {
                     emits.login()
                 }
             })
