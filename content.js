@@ -93,7 +93,6 @@ async function triggerSampleData(v) {
         return
     }
     const currentSampleId = $(v).attr('id')
-    if (currentId.value === currentSampleId) return
     if (currentId.value && currentId.value !== currentSampleId) {
         await new Promise((resolve) => {
             closeDislogHandle2(resolve)
@@ -152,7 +151,12 @@ function createButtonHook2() {
             return findComponentTemplate('pushButton')({}, {}, {
                 update: () => {
                     pushStatusErrorTip.value = null
-                    nationalPumpPush(toValue(currentId));
+                    if (!trCurrentDataMps.has(currentId.value)) {
+                        sendCurrentMessage()
+                    } else {
+                        nationalPumpPush(toValue(currentId));
+                    }
+                    pushStatusErrorTip.value = null
                 },
                 login: () => {
                     loginAlterHandler()
@@ -273,6 +277,10 @@ const ResponseStatus = {
     RESPONSECOMPLETEERROR(message) {
         pushStatusErrorTip.value = message
         trCurrentDataMps.delete(currentId.value)
+        addNotification({
+            type: 3,
+            message: message
+        })
     },
     LOGINSTATUSRESPONSE(message) {
         pushStatusLoading.value = false
@@ -290,6 +298,10 @@ const ResponseStatus = {
             }
         } else {
             pushStatusErrorTip.value = "请求异常，重新操作一下"
+            addNotification({
+                type: 3,
+                message: "请求异常，重新操作一下"
+            })
         }
     },
     PUSHSTATUSRESPONSE(message) {
@@ -302,6 +314,10 @@ const ResponseStatus = {
         } else {
             pushStatusErrorTip.value = "请求异常，重新操作一下"
             alreadyPushedData.delete(message.id)
+            addNotification({
+                type: 3,
+                message: "请求异常，重新操作一下"
+            })
         }
     },
     LOGINRESPONSE(message) {

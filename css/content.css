@@ -420,7 +420,7 @@ div.ts-msg-tip-notification-gp-hide {
 
 .ts-msg-tip-notification-gp-content {
   width: fit-content;
-  padding: 10px;
+  padding:8px 10px;
   position: relative;
 }
 

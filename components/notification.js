@@ -31,7 +31,7 @@
     function transformNotificationBg(type) {
         return `bg-${type === 1 ? "success" : type === 2 ? "warning" : "danger"}`
     }
-    
+
     function generateNotificationElBindEvent(target, callback) {
         const el = target.el
         let status = true
@@ -73,7 +73,7 @@
             <div class="ts-msg-tip-notification-gp ts-msg-tip-notification-gp-hide">
                 <div class="ts-msg-tip-notification-gp-content">
                     <h4 class="ts-msg-tip-notification-gp-content-title"></h4>
-                    <p></p>
+                    <div class="ts-msg-tip-notification-gp-content-content"></div>
                 </div>
                 ${n.showClose ? `<button type="button" class="ts-msg-tip-notification-gp-close close" aria-label="Close"><span
                         aria-hidden="true">&times;</span></button>` : ''}
@@ -96,7 +96,7 @@
 
             scope.run(() => {
                 watchEffect(() => {
-                    n.el.find(".ts-msg-tip-notification-gp-content>p").html(n.message)
+                    n.el.find(".ts-msg-tip-notification-gp-content-content").html(n.message)
                 })
                 watchEffect(() => {
                     n.el.find(".ts-msg-tip-notification-gp-content-title").html(n.title)
