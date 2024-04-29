@@ -11,6 +11,10 @@
   --el-fill-color-light: #f5f7fa;
   --el-color-warning: #e6a23c;
   --el-transition-duration: .3s;
+  --el-notification-shadow-cj: 2px 2px 2px #dfdfdf;
+  --el-notification-max-width-cj: 320px;
+  --el-notification-close-btn-offset-cj: 6px;
+  --ts-msg-tip-notification-gp-transition: 240ms;
 }
 
 * {
@@ -244,8 +248,8 @@ button.el-button-none-plj {
   border-radius: 4px;
 }
 
-.el-update-gij .el-update-content-btn-gij{
-  padding-left:12px;
+.el-update-gij .el-update-content-btn-gij {
+  padding-left: 12px;
 }
 
 .el-login-status-error {
@@ -280,7 +284,7 @@ button.el-button-none-plj {
 
 .el-update-gij .el-update-content-gij {
   padding: 12px;
-  height:calc(100% - 44px - 50px);
+  height: calc(100% - 44px - 50px);
   overflow: hidden auto;
 }
 
@@ -395,4 +399,40 @@ label[required]::before {
   content: "*";
   color: #f56c6c;
   margin-right: 2px;
+}
+
+.ts-msg-tip-notification-gp {
+  width: fit-content;
+  position: fixed;
+  top: 0;
+  width: var(--el-notification-max-width-cj);
+  box-shadow: var(--el-notification-shadow-cj);
+  border-radius: 3px;
+  overflow: hidden;
+  transition: opacity var(--ts-msg-tip-notification-gp-transition), right var(--ts-msg-tip-notification-gp-transition), top var(--ts-msg-tip-notification-gp-transition);
+  right: 0;
+}
+
+div.ts-msg-tip-notification-gp-hide {
+  right: calc(var(--el-notification-max-width-cj) - var(--el-notification-max-width-cj) *2);
+  opacity: .4;
+}
+
+.ts-msg-tip-notification-gp-content {
+  width: fit-content;
+  padding: 10px;
+  position: relative;
+}
+
+.ts-msg-tip-notification-gp .ts-msg-tip-notification-gp-close {
+  position: absolute;
+  right: var(--el-notification-close-btn-offset-cj);
+  top: var(--el-notification-close-btn-offset-cj);
+}
+
+.ts-msg-tip-notification-gp-content-title {
+  font-weight: 900;
+  font-size: 16px;
+  line-height: 1;
+  margin: 6px 0 10px 0;
 }

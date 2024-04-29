@@ -4,29 +4,36 @@ let isAutoGenerateXmlHeader = true
 
 console.log(chrome, Date.now());
 
+let preSocket = null
+
 function createSocker(name) {
-    const scoker = new WebSocket("ws" + loginstatusUrl.slice(4) + "/ws/" + name)
+    if (preSocket) {
+        preSocket.close()
+    }
+    const socker = new WebSocket("ws" + loginstatusUrl.slice(4) + "/ws/" + name)
+    preSocket = socker
+    socker.onopen = function () {
 
-    scoker.onopen = function () {
-
-        console.log('scoker open');
+        console.log('socker open');
     }
 
-    scoker.onclose = function () {
+    socker.onclose = function () {
 
-        console.log('scoker close');
+        console.log('socker close');
     }
 
-    scoker.onerror = function () {
+    socker.onerror = function () {
 
-        console.log('scoker error');
+        console.log('socker error');
     }
 
-    scoker.onmessage = function ({ data }) {
-        console.log(data);
+    socker.onmessage = function ({ data }) {
+        sendMessage({
+            type: "SOCKERRESPONSE", message: {
+                code: 200, data: data
+            }
+        })
     }
-
-    console.log(scoker);
 }
 
 class NationalPushAPI {
@@ -48,7 +55,7 @@ class NationalPushAPI {
             }),
             headers: { 'Content-Type': 'application/json' }
         }).then(res => res.json()).then(res => {
-            if(res.status){
+            if (res.status) {
                 createSocker(message.account)
             }
             sendMessage({
@@ -83,7 +90,7 @@ class NationalPushAPI {
             }
             sendMessage({
                 type: "LOGINSTATUSRESPONSE", message: {
-                    code: 200, data: res
+                    code: 200, data: message.isInitFlag ? { status: true } : res
                 }
             })
         }).catch(err => {
@@ -114,6 +121,7 @@ class NationalPushAPI {
             info: message.info,
             items: message.items,
             allItems: message.allItems,
+            account: message.nickname,
         }))
         if (message.enterpriseStandardName) {
             formData.append("enterpriseStandardName", message.enterpriseStandardName || "")

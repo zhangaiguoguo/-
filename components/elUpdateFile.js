@@ -100,7 +100,7 @@
         const root = $(`
         <div class="el-update-gij-enterprise-stand-content">
             <div class="form-group">
-                <label for="exampleInputPassword1" required>现时报：</label>
+                <label for="exampleInputPassword1" required>限时报：</label>
                 <div class="el-update-content-btn-gij">
                     <button class="btn btn-primary" id="el-update-btn" uploadFile>上传附件</button>
                     ${props.fileList.length ? '' : `

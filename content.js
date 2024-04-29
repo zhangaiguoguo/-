@@ -55,7 +55,7 @@ const tastConclusionMaskLayer = createComponent($(document.body), function (prop
         default: () => {
             return findComponentTemplate("closeDialog")({}, {
                 default: () => {
-                    return `<h4 style="font-weight:600;">是否要12小时现时报？</h4>`
+                    return `<h4 style="font-weight:600;">是否要12小时限时报？</h4>`
                 }
             }, {
                 cancel() {
@@ -122,7 +122,6 @@ watch(currentId, v => {
     releaseEffect()
     if (v) {
         obsDOMTrMps2.value = observerNode(`div.taskMain div#LIMSTestReportApproveDetail>table tbody .childDiv table.resizabletable tbody`, function (v) {
-            if (isTriggerCount) return
             const tds = v.find('td>span')
             currentCYDNumber.value = findtdsValue2(tds, "抽样单号：")
             {
@@ -153,7 +152,7 @@ function createButtonHook2() {
             return findComponentTemplate('pushButton')({}, {}, {
                 update: () => {
                     pushStatusErrorTip.value = null
-                    sendCurrentMessage()
+                    nationalPumpPush(toValue(currentId));
                 },
                 login: () => {
                     loginAlterHandler()
@@ -260,24 +259,16 @@ function closeDislogHandle2(arg, id = currentId.value) {
     }
 }
 
-function notification(message) {
-    message = typeof message === "object" && message !== null ? message : { message: message }
-    if (typeof Notification && toValue(globalState.notificationPermissionFlag)) {
-        if (Notification.permission === "granted") {
-            var notification = new Notification("推送提醒", { body: message.message });
-            notification.onclick = function () {
-                chrome.runtime.sendMessage({ type: "GETTAGS" });
-            }
-        }
-    } else {
-
-    }
-}
+let isInitFlag = false
 
 const ResponseStatus = {
     RESPONSECOMPLETE(message) {
         trCurrentDataMps.set(currentId.value, message)
         pushStatusLoading.value = false
+        if (!isInitFlag) {
+            getLoginStatus(true)
+            isInitFlag = true
+        }
     },
     RESPONSECOMPLETEERROR(message) {
         pushStatusErrorTip.value = message
@@ -336,6 +327,9 @@ const ResponseStatus = {
         if (message.status) {
         } else {
         }
+    },
+    SOCKERRESPONSE(message) {
+        addNotification(message)
     }
 }
 
@@ -360,6 +354,9 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             break
         case "GETTAGSRESPONSE":
             ResponseStatus.GETTAGSRESPONSE(message)
+            break
+        case "SOCKERRESPONSE":
+            ResponseStatus.SOCKERRESPONSE(message)
             break
 
     }

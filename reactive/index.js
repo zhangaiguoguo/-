@@ -1238,10 +1238,9 @@
                 callWithErrorHandling(cb)
             }
         } finally {
-            queue.length = 0
             isFlushing = false
             if (queue.length) {
-                queueFlush(seen)
+                flushJobs(seen)
             }
         }
     }

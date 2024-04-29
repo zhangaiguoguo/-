@@ -51,6 +51,7 @@
                 "components/closeDialog.js",
                 "components/pushButton.js",
                 "components/elUpdateFile.js",
+                "components/notification.js",
                 "components/icons/index.js",
                 "content.js"
             ],

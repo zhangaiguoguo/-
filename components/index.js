@@ -24,7 +24,7 @@ window.globalState = {
     currentDataIsPushGC: ref(false),
     currentUuid: ref(null),
     notificationPermissionFlag: ref(false),
-    currentSampleFlag: ref([1, 1])
+    currentSampleFlag: ref([0, 0])
 }
 
 Notification.requestPermission().then(function (permission) {
@@ -63,6 +63,50 @@ function modelValueInput(options) {
     }
 }
 
+function setPropertyDomHeight(target, callback) {
+    const height = target.getBoundingClientRect().height
+    target.style.setProperty("--el-obs-auto-height", height + "px")
+    callback && callback(height)
+}
+
+
+function resizeObserver(dom, callback) {
+    let flag = true
+    let observer = null
+    if ('ResizeObserver' in window) {
+        observer = new ResizeObserver(entries => {
+            setPropertyDomHeight(dom, callback)
+        });
+
+        // 开始观察一个或多个元素 
+        observer.observe(dom);
+    } else {
+        observer = new MutationObserver((mutations) => {
+            if (!flag) {
+                return
+            }
+            flag = false
+            setPropertyDomHeight(dom, callback)
+            requestAnimationFrame(() => {
+                flag = true
+            })
+        });
+        observer.observe(dom, {
+            attributes: true,
+            subtree: true,
+            childList: true,
+            childNodes: true
+        });
+    }
+
+    if (observer) {
+        dom.remove = function () {
+            flag = false
+            observer.disconnect()
+            document.body.remove.apply(dom)
+        }
+    }
+}
 
 function findtdsValue2(tds, k) {
     return tds.filter((i, e) => $(e).html() === k).parent().next().find(".btn-group ._sCtFs").val() || ""
@@ -218,7 +262,7 @@ function nationalPumpPush(currentSampleID) {
         return getLoginStatus()
     }
     const row = trCurrentDataMps.get(currentSampleID)
-    const dones = [1, 2] || [row.info[keys[0]] === "不合格", (row.info[keys[1]] || "").indexOf("Q/") !== -1];
+    const dones = [row.info[keys[0]] === "不合格", (row.info[keys[1]] || "").indexOf("Q/") !== -1];
     globalState.currentSampleFlag.value = dones
     if (dones[0]) {
         tastConclusionMaskLayer()
@@ -302,13 +346,14 @@ function checkRecursiveUpdates(seen, fn) {
 }
 
 
-function getLoginStatus() {
+function getLoginStatus(isInitFlag) {
     globalState.pushStatusLoading.value = true
     chrome.runtime.sendMessage({
         type: "LOGINSTATUS", message: {
             ...globalState.trCurrentDataMps.get(toValue(globalState.currentId)),
             ...getLoginInfo(),
-            uuid: globalState.currentUuid.value
+            uuid: globalState.currentUuid.value,
+            isInitFlag
         }
     })
 }
