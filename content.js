@@ -285,7 +285,7 @@ const ResponseStatus = {
             } else {
                 if (toValue(currentDataIsPushGC)) {
                     currentUuid.value = message.data.processId
-                    nationalPumpPush(toValue(currentId))
+                    nationalPumpPush(toValue(message.id || currentId))
                 }
             }
         } else {
