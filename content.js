@@ -1,13 +1,18 @@
 const { alreadyPushedData, pushStatusLoading, pushStatusErrorTip, buttonsRef, obsTreeStr, obsDOMTrMps, obsDOMTrMps2, trCurrentDataMps, trMps, currentId, currentCYDNumber, currentFuncStatus, currentTaskMainRootEl, currentVerificationCode, currentLoginStatus, currentLoginStatusErrorTip, currentLoginStatusFlag, currentDataIsPushGC, prevCurrentId, currentUuid, currentSampleFlag } = window.globalState;
 
+let loginComponentDestroy;
+
 const loginAlterHandler = createComponent($(document.body), function (props) {
     currentLoginStatus.value = props.destroy
+    loginComponentDestroy = props.destroy
     return findComponentTemplate('login')({
         ...getLoginInfo(),
     }, {
         destroy: props.destroy
     })
 })
+
+// loginAlterHandler()
 
 async function parseReadAsDataURL(list) {
     let l = []
@@ -329,6 +334,7 @@ const ResponseStatus = {
                 if (toValue(currentDataIsPushGC)) {
                     nationalPumpPush(toValue(currentId.value))
                 }
+                loginComponentDestroy && loginComponentDestroy()
             } else {
                 currentVerificationCode.value = message.data.data || message.data.value
                 loginStatusError()

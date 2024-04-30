@@ -56,7 +56,7 @@ class NationalPushAPI {
             headers: { 'Content-Type': 'application/json' }
         }).then(res => res.json()).then(res => {
             if (res.status) {
-                createSocker(message.account)
+                createSocker(message.nickname)
             }
             sendMessage({
                 type: "LOGINRESPONSE", message: {
@@ -85,9 +85,6 @@ class NationalPushAPI {
             }),
             headers: { 'Content-Type': 'application/json' }
         }).then(res => res.json()).then(res => {
-            if (res.status) {
-                createSocker(message.account)
-            }
             sendMessage({
                 type: "LOGINSTATUSRESPONSE", message: {
                     code: 200, data: message.isInitFlag ? { status: true } : res
