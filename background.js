@@ -22,6 +22,7 @@ function createSocker(name) {
         socker.onclose = function () {
 
             console.log('socker close');
+            createSocker(name)
         }
 
         socker.onerror = function () {

@@ -8,7 +8,8 @@ const loginAlterHandler = createComponent($(document.body), function (props) {
     return findComponentTemplate('login')({
         ...getLoginInfo(),
     }, {
-        destroy: props.destroy
+        destroy: props.destroy,
+        loginAlterHandler
     })
 })
 
