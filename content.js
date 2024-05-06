@@ -24,7 +24,7 @@ async function parseReadAsDataURL(list) {
                 resolve(result)
             }
         })
-        l.push(result)
+        l.push([file.name, result])
     }
     return l
 }
@@ -37,7 +37,7 @@ const createUpLoadFileNode = createComponent($(document.body), function (props) 
             pushStatusLoading.value = true
             try {
                 var fileUrls = await parseReadAsDataURL(options.files || [])
-                var fileUrls2 = await parseReadAsDataURL(options.files)
+                var fileUrls2 = await parseReadAsDataURL(options.limittimeFile)
             } catch (er) {
 
             }
@@ -93,7 +93,7 @@ observerNode(obsTreeStr, (v) => {
 });
 
 async function triggerSampleData(v) {
-    await delay()
+    await delay(100)
     if (!$('div.main>div.taskMain').hidden()) {
         return
     }
@@ -103,8 +103,9 @@ async function triggerSampleData(v) {
             closeDislogHandle2(resolve)
         })
     }
-    if (!$(v).find("td[aria-describedby=list_SamplingNO]").text()) {
+    if (!$(v).find("td[aria-describedby=list_SamplingNO]").text().trim()) {
         destroyTSGCElements(toValue(currentTaskMainRootEl))
+        resize()
         return
     }
     resize()
@@ -125,18 +126,21 @@ function setTriggerCount() {
 watch(currentId, v => {
     releaseEffect()
     if (v) {
-        obsDOMTrMps2.value = observerNode(`div.taskMain div#LIMSTestReportApproveDetail>table tbody .childDiv table.resizabletable tbody`, function (v) {
+        obsDOMTrMps2.value = observerNode(`div.taskMain div#LIMSTestReportApproveDetail div.childDiv>table#${'tb4a034014-5582-8b59-bc71-4e74cf4ae623'}>tbody`, function (v) {
             const tds = v.find('td>span')
             currentCYDNumber.value = findtdsValue2(tds, "抽样单号：")
             {
                 const wtddwName = findtdsValue2(tds, "检测类型：")
-                const validateVal = "食品安全监督抽检"
+                const validateVal = "食品安全监督抽"
                 if (wtddwName.length && wtddwName.indexOf(validateVal) > -1) {
                     obsDOMTrMps.value = observerNode('div.taskMain ul#_sys_TabMain div.reportListPages', (root) => {
                         releaseEffect()
                         currentTaskMainRootEl.value = root
                         getCurrentPushData()
                     })
+                } else {
+                    if (wtddwName.length)
+                        currentId.value = null
                 }
             }
         })
@@ -183,6 +187,7 @@ function createButtonHook(rootEl) {
 
 function destroyTSGCElements(root = toValue(currentTaskMainRootEl)) {
     root && root.find("div.btn-group-box-hij").remove()
+    removeCloseTaskBotBtnEffect()
 }
 
 function getCurrentPushData() {
@@ -215,11 +220,21 @@ function sendCurrentMessage() {
     chrome.runtime.sendMessage({ type: "TABLECLICK", id: currentId.value });
 }
 
+let closeTaskBotBtn = null
+
+function removeCloseTaskBotBtnEffect() {
+    if (closeTaskBotBtn) {
+        closeTaskBotBtn[0].removeEventListener('click', closeDislogHandle2, false)
+    }
+}
+
 function closeDislogHandle(root) {
-    observerNode('.taskMain .closeTaskBot span', function (v) {
-        v[0].removeEventListener('click', closeDislogHandle2, false)
-        v[0].addEventListener('click', closeDislogHandle2, false)
-    })
+    if (currentId.value)
+        observerNode('.taskMain .closeTaskBot span', function (v) {
+            closeTaskBotBtn = v
+            removeCloseTaskBotBtnEffect()
+            v[0].addEventListener('click', closeDislogHandle2, false)
+        })
 }
 
 const createCloseDialog = createComponent($(document.body), function (props) {
@@ -233,7 +248,17 @@ const createCloseDialog = createComponent($(document.body), function (props) {
             commontjs()
         },
         confirm() {
-            nationalPumpPush(toValue(currentId))
+            const id = toValue(currentId)
+            const stop = watch(() => trCurrentDataMps.get(id), (v) => {
+                if (v) {
+                    nationalPumpPush(id)
+                    setTimeout(() => {
+                        stop()
+                    })
+                }
+            }, {
+                immediate: true
+            })
             commontjs()
         },
         destroy: props.destroy
@@ -272,7 +297,7 @@ let isInitFlag = false
 
 const ResponseStatus = {
     RESPONSECOMPLETE(message) {
-        trCurrentDataMps.set(currentId.value, message)
+        trCurrentDataMps.set(message.info.ID, message)
         pushStatusLoading.value = false
         if (!isInitFlag) {
             getLoginStatus(true)
@@ -293,7 +318,7 @@ const ResponseStatus = {
         if (message.code === 200) {
             currentLoginStatusFlag.value = message.data[FLAGKEY]
             if (!message.data[FLAGKEY]) {
-                currentVerificationCode.value = message.data.value
+                currentVerificationCode.value = createBlobUrl(message.data.value)
                 loginAlterHandler()
             } else {
                 if (toValue(currentDataIsPushGC)) {
@@ -313,7 +338,6 @@ const ResponseStatus = {
         pushStatusLoading.value = false
         if (message.code === 200) {
             if (message.data.status) {
-                notification("数据推送成功")
                 return
             }
         } else {
@@ -336,7 +360,7 @@ const ResponseStatus = {
                 }
                 loginComponentDestroy && loginComponentDestroy()
             } else {
-                currentVerificationCode.value = message.data.data || message.data.value
+                currentVerificationCode.value = createBlobUrl(message.data.data || message.data.value)
                 loginStatusError()
             }
         } else {
@@ -351,7 +375,30 @@ const ResponseStatus = {
         }
     },
     SOCKERRESPONSE(message) {
-        addNotification(message)
+        const data = JSON.parse(message)
+        if (typeof data === "object" && data) {
+            if (data.fill_report_statu || data.exactly_item.length || data.item_exactly_standard.length) {
+                addNotification({
+                    message: message,
+                    type: 3
+                })
+            } else if (data.item_inconsistent_messages.length) {
+                addNotification({
+                    message: message,
+                    type: 2
+                })
+            } else {
+                addNotification({
+                    message: message,
+                    type: 4
+                })
+            }
+        } else {
+            addNotification({
+                message: message,
+                type: 3
+            })
+        }
     }
 }
 

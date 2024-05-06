@@ -45,7 +45,7 @@
                                 <tr>
                                     <td>
                                         <div class="childDiv">
-                                            <table class="resizabletable" id="${w.id}">
+                                            <table class="resizabletable" id="tb4a034014-5582-8b59-bc71-4e74cf4ae623">
                                                 <tbody>
                                                     <tr>
                                                         <td>
@@ -103,6 +103,8 @@
             </div>
         </div>
     </div>
+    <img src="" alt="" loading="lazy">
+    <input type="file" name="" id="file">
 </body>
 <script>
     let done = false
@@ -126,6 +128,10 @@
     }
 
     fn()
+
+    $('#file').change(({ target }) => {
+        console.log(target.files);
+    })
 
 </script>
 

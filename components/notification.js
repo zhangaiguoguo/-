@@ -29,7 +29,7 @@
     }
 
     function transformNotificationBg(type) {
-        return `bg-${type === 1 ? "success" : type === 2 ? "warning" : "danger"}`
+        return `bg-${type === 1 ? "success" : type === 2 ? "warning" : type === 4 ? "info" : "danger"}`
     }
 
     function generateNotificationElBindEvent(target, callback) {
@@ -103,7 +103,7 @@
                 })
                 watchEffect(() => {
                     const vel = n.el[0]
-                    n.el.removeClass([1, 2, 3].map((v) => transformNotificationBg(v)).join(" "))
+                    n.el.removeClass([1, 2, 3,4].map((v) => transformNotificationBg(v)).join(" "))
                     n.el.addClass(transformNotificationBg(n.type))
                 })
                 watchEffect(() => {
@@ -166,7 +166,7 @@
 
         defaultAddOptionsValue(options, 'duration', 240);
 
-        defaultAddOptionsValue(options, 'closeTime', 1800);
+        defaultAddOptionsValue(options, 'closeTime', 4000);
 
         defaultAddOptionsValue(options, 'showClose', true);
 

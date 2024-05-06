@@ -1,4 +1,4 @@
-const { ref, watch, useStateRef, useEffectRef, effectScope, toValue, useUpdate, useEffect, useEffectPre, useState } = window.hooks
+const { ref, watch, useStateRef, useEffectRef, effectScope, toValue, useUpdate, useEffect, useEffectPre, useState, reactive } = window.hooks
 
 window.globalState = {
     alreadyPushedData: new Map(),
@@ -7,7 +7,7 @@ window.globalState = {
     currentCreateButton: null,
     buttonsRef: ['push-national-draw', 'again-refresh', 'btn-login'],
     obsTreeStr: "div.main div.content #gbox_list table#list tbody",
-    trCurrentDataMps: new Map(),
+    trCurrentDataMps: reactive(new Map()),
     trMps: new Map(),
     obsDOMTrMps: ref(null),
     obsDOMTrMps2: ref(null),
@@ -240,6 +240,17 @@ function observerNode(obsTreeStr, callback) {
             obss.observe(el[0], {
                 "childList": true,
             });
+            const obss2 = new MutationObserver((v) => {
+                const result = el[0].parentNode
+                if (!result) {
+                    run();
+                    obss.disconnect()
+                    obss2.disconnect()
+                }
+            });
+            obss2.observe(el[0].parentNode, {
+                "childList": true,
+            });
             getNum++
         });
     }
@@ -252,7 +263,7 @@ function observerNode(obsTreeStr, callback) {
 
 const keys = ['TastConclusion', 'TestBasis']
 
-function nationalPumpPush(currentSampleID) {
+async function nationalPumpPush(currentSampleID) {
     globalState.currentDataIsPushGC.value = false
     if (!trCurrentDataMps.has(currentSampleID)) {
         return pushStatusErrorTip.value = "数据获取异常，无法推送"
@@ -262,7 +273,19 @@ function nationalPumpPush(currentSampleID) {
         return getLoginStatus()
     }
     const row = trCurrentDataMps.get(currentSampleID)
-    const dones = [row.info[keys[0]] === "不合格", (row.info[keys[1]] || "").indexOf("Q/") !== -1];
+
+
+    let is12BFlag = ""
+    if (row.info.TaskConclusion1 !== "合格") {
+        try {
+            is12BFlag = await chrome.runtime.sendMessage({
+                type: "LIMITREPORT",
+                message: row
+            })
+        } catch (err) { }
+    }
+
+    const dones = [is12BFlag, (row.info[keys[1]] || "").indexOf("Q/") !== -1];
     globalState.currentSampleFlag.value = dones
     if (dones[0]) {
         tastConclusionMaskLayer()
@@ -389,4 +412,34 @@ function pushCurrentData(status = 1, options = {}) {
     } else {
         alreadyPushedData.delete(id)
     }
+}
+
+function base64ToBlob(base64Data, contentType) {
+    contentType = contentType || '';
+    const sliceSize = 1024;
+    const byteCharacters = atob(base64Data.split(',')[1]);
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+    }
+
+    const blob = new Blob(byteArrays, { type: contentType });
+    return blob;
+}
+
+function createBlobUrl(base64Data, contentType) {
+    if (!base64Data) return null
+    contentType = contentType || base64Data.split(/(data:)/).filter(Boolean)[1].split("base64,")[0].slice(0, -1)
+    const blob = base64ToBlob(base64Data, contentType);
+    const blobUrl = URL.createObjectURL(blob);
+    return blobUrl;
 }

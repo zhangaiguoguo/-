@@ -69,13 +69,13 @@
         const root = $(`
         <div class="el-update-gij-enterprise-stand-content">
             <div class="form-group">
-                <label required for="exampleInputPassword1" required>企业标准名称：</label>
+                <label for="exampleInputPassword1">企业标准名称：</label>
                 <div class="el-update-content-btn-gij">
                     <input type="text" class="form-control" id="enterpriseStandardName" id="exampleInputPassword1">
                 </div>
             </div>
             <div class="form-group">
-                <label required for="exampleInputPassword1">企业标准附件：</label>
+                <label for="exampleInputPassword1">企业标准附件：</label>
                 <div class="el-update-content-btn-gij">
                     <button class="btn btn-primary" id="el-update-btn" uploadFile2>上传附件</button>
                     ${props.limittimeFile.length ? '' : `
@@ -99,8 +99,11 @@
     const templateUpdateFile = (props) => {
         const root = $(`
         <div class="el-update-gij-enterprise-stand-content">
+        <div class="form-group">
+            <span>${toValue(currentSampleFlag)[0]}</span>
+        </div>
             <div class="form-group">
-                <label for="exampleInputPassword1" required>限时报：</label>
+                <label for="exampleInputPassword1">限时报：</label>
                 <div class="el-update-content-btn-gij">
                     <button class="btn btn-primary" id="el-update-btn" uploadFile>上传附件</button>
                     ${props.fileList.length ? '' : `
@@ -128,9 +131,9 @@
           <div class="el-update-content-gij">
             <input type="file" id="el-update-content-input-gij" multiple draggable>
           </div>
-          ${(toValue(currentSampleFlag)[0] ? props.fileList.length : true) && (toValue(currentSampleFlag)[1] ? props.limittimeFile.length && props.enterpriseStandardName : true) ? `<div class="el-update-footer-gij">
-          <button class="btn btn-primary" id="el-update-btn-save" submit>提交</button>
-        </div>`: ""}
+          <div class="el-update-footer-gij">
+            <button class="btn btn-primary" id="el-update-btn-save" submit>提交</button>
+        </div>
         </div>`)
         const contentRoot = root.find('.el-update-content-gij')
         if (toValue(currentSampleFlag)[1]) {

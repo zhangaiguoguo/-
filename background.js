@@ -1,4 +1,4 @@
-import { baseUrl, prems, url1, url1Key, url2, url2Query, onBeforeSendHeadersOptions, createCurrentDataTask, runCurrentDataTask, sendMessage, addSendHeaders, sendHeadersHas, createDataMp, dataURLtoBlob } from "./utils/index.js"
+import { baseUrl, prems, url1, url1Key, url2, url2Query, onBeforeSendHeadersOptions, createCurrentDataTask, runCurrentDataTask, sendMessage, addSendHeaders, sendHeadersHas, createDataMp, base64ToFiles } from "./utils/index.js"
 
 let isAutoGenerateXmlHeader = true
 
@@ -10,30 +10,34 @@ function createSocker(name) {
     if (preSocket) {
         preSocket.close()
     }
-    const socker = new WebSocket("ws" + loginstatusUrl.slice(4) + "/ws/" + name)
-    preSocket = socker
-    socker.onopen = function () {
+    return new Promise((reslove, reject) => {
+        const socker = new WebSocket("ws" + loginstatusUrl.slice(4) + "/ws/" + name)
+        preSocket = socker
+        socker.onopen = function () {
 
-        console.log('socker open');
-    }
+            console.log('socker open');
+            reslove()
+        }
 
-    socker.onclose = function () {
+        socker.onclose = function () {
 
-        console.log('socker close');
-    }
+            console.log('socker close');
+        }
 
-    socker.onerror = function () {
+        socker.onerror = function () {
 
-        console.log('socker error');
-    }
+            console.log('socker error');
+            reject()
+        }
 
-    socker.onmessage = function ({ data }) {
-        sendMessage({
-            type: "SOCKERRESPONSE", message: {
-                code: 200, data: data
-            }
-        })
-    }
+        socker.onmessage = function ({ data }) {
+            sendMessage({
+                type: "SOCKERRESPONSE", message: {
+                    code: 200, data: data
+                }
+            })
+        }
+    })
 }
 
 class NationalPushAPI {
@@ -54,9 +58,9 @@ class NationalPushAPI {
                 uid: message.uuid
             }),
             headers: { 'Content-Type': 'application/json' }
-        }).then(res => res.json()).then(res => {
+        }).then(res => res.json()).then(async res => {
             if (res.status) {
-                createSocker(message.nickname)
+                await createSocker(message.nickname)
             }
             sendMessage({
                 type: "LOGINRESPONSE", message: {
@@ -102,17 +106,13 @@ class NationalPushAPI {
     //推送
     pushStatus(message) {
         const files = message.files
-        const files2 = message.files
+        const files2 = message.limittimeFile
         const formData = new FormData()
         if (files) {
-            for (let w = 0; w < files.length; w++) {
-                formData.append('standardFile', dataURLtoBlob(files[w]))
-            }
+            base64ToFiles(files, formData, 'standardFile')
         }
         if (files2) {
-            for (let w = 0; w < files2.length; w++) {
-                formData.append('limittimeFile', dataURLtoBlob(files2[w]))
-            }
+            base64ToFiles(files2, formData, 'limittimeFile')
         }
         formData.append("pushinfo", JSON.stringify({
             info: message.info,
@@ -148,6 +148,16 @@ class NationalPushAPI {
             method: "GET",
         }).then((res) => {
             console.log(res);
+        })
+    }
+
+    limitreport(message, sender, sendResponse) {
+        fetch(this.baseUrl + "/limitreport", {
+            method: "post",
+            body: JSON.stringify(message),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(res => res.json()).then(res => {
+            sendResponse(res)
         })
     }
 }
@@ -246,6 +256,9 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         case "CANCELPUSH":
             nationalPushAPI.cancelPush(message)
             break
+        case "LIMITREPORT":
+            nationalPushAPI.limitreport(message, sender, sendResponse)
+            break
         case "GETTAGS":
             {
                 chrome.tabs.query({
@@ -267,4 +280,5 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             }
             break
     }
+    return true
 });

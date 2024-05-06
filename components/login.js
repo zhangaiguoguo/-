@@ -34,7 +34,7 @@
                         <div class="el-form-item_content">
                             <input required type="type" class="form-control el-input form-validate-yzm-inp box_content"
                                 name="verificationCode" id="verificationCode" placeholder="请输入验证码">
-                            <img src="${toValue(currentVerificationCode)}" alt="失败" class="form-validate-yzm" />
+                            <img src="${toValue(currentVerificationCode)}" loading="lazy" alt="失败" class="form-validate-yzm" />
                         </div>
                     </div>
                     <div class="form-group el-form-item">

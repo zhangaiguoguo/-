@@ -172,3 +172,67 @@ export const dataURLtoBlob = (dataUrl) => {
         type: mime,
     })
 }
+
+export function mimeTypeToFileExtension(mimeType) {
+    // 定义一个MIME类型到文件后缀的映射对象  
+    const mimeTypeToExtensionMap = {
+        // 文本文件  
+        'text/plain': '.txt',
+        'text/html': '.html',
+        'text/css': '.css',
+        'text/javascript': '.js',
+        'application/json': '.json',
+        'application/xml': '.xml',
+
+        // 图片文件  
+        'image/jpeg': '.jpg',
+        'image/png': '.png',
+        'image/gif': '.gif',
+        'image/bmp': '.bmp',
+        'image/webp': '.webp',
+        'image/svg+xml': '.svg',
+
+        // Office文档  
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation': '.pptx',
+        'application/vnd.ms-excel': '.xls', // 旧版Excel  
+        'application/msword': '.doc', // 旧版Word  
+        'application/vnd.ms-powerpoint': '.ppt', // 旧版PowerPoint  
+
+        // PDF文件  
+        'application/pdf': '.pdf',
+
+        // 压缩文件  
+        'application/zip': '.zip',
+        'application/gzip': '.gz',
+        'application/x-tar': '.tar',
+
+        // 音频文件  
+        'audio/mpeg': '.mp3',
+        'audio/wav': '.wav',
+        'audio/ogg': '.ogg',
+
+        // 视频文件  
+        'video/mp4': '.mp4',
+        'video/webm': '.webm',
+        'video/ogg': '.ogv',
+
+        // 其他文件类型  
+        'application/octet-stream': '', // 通用二进制流（无特定后缀）  
+        // ... 你可以继续添加其他MIME类型  
+    };
+
+    // 检查MIME类型是否在映射中存在  
+    return mimeTypeToExtensionMap[mimeType] || null; // 如果不存在，则返回null  
+}
+
+export function base64ToFiles(files, formData, key) {
+    for (let w = 0; w < files.length; w++) {
+        const blob = dataURLtoBlob(files[w][1])
+        formData.append(key, new File([blob], files[w][0], {
+            type: blob.type,
+            lastModified: Date.now()
+        }))
+    }
+}
