@@ -31,7 +31,7 @@ async function parseReadAsDataURL(list) {
 
 const createUpLoadFileNode = createComponent($(document.body), function (props) {
     return findComponentTemplate('elUpdateFile')({
-    }, {}, {
+    }, props, {
         destroy: props.destroy,
         async submit(options) {
             pushStatusLoading.value = true
@@ -44,7 +44,8 @@ const createUpLoadFileNode = createComponent($(document.body), function (props) 
             pushCurrentData(1, {
                 files: fileUrls,
                 limittimeFile: fileUrls2,
-                enterpriseStandardName: options.enterpriseStandardName
+                enterpriseStandardName: options.enterpriseStandardName,
+                id:props.id
             })
             pushStatusLoading.value = false
             props.destroy()
@@ -56,7 +57,7 @@ const createUpLoadFileNode = createComponent($(document.body), function (props) 
 // createUpLoadFileNode()
 
 const tastConclusionMaskLayer = createComponent($(document.body), function (props) {
-    return findComponentTemplate('maskLayer')({}, {
+    return findComponentTemplate('maskLayer')(props, {
         default: () => {
             return findComponentTemplate("closeDialog")({}, {
                 default: () => {
@@ -66,13 +67,13 @@ const tastConclusionMaskLayer = createComponent($(document.body), function (prop
                 cancel() {
                     currentSampleFlag.value[0] = false
                     if (toValue(currentSampleFlag)[1]) {
-                        createUpLoadFileNode()
+                        createUpLoadFileNode(props)
                     } else {
                         pushCurrentData()
                     }
                 },
                 confirm() {
-                    createUpLoadFileNode()
+                    createUpLoadFileNode(props)
                 },
                 destroy: props.destroy
             })
@@ -250,7 +251,7 @@ const createCloseDialog = createComponent($(document.body), function (props) {
         confirm() {
             const id = toValue(currentId)
             const stop = watch(() => trCurrentDataMps.get(id), (v) => {
-                if (v) {
+                if (v && v.allItems) {
                     nationalPumpPush(id)
                     setTimeout(() => {
                         stop()
@@ -379,19 +380,39 @@ const ResponseStatus = {
         if (typeof data === "object" && data) {
             if (data.fill_report_statu || data.exactly_item.length || data.item_exactly_standard.length) {
                 addNotification({
-                    message: message,
-                    type: 3
+                    message: () => `<div>
+                        <p>
+                            抽样单编号为${data.samplingNO}的错误提示:
+                        </p>
+                        <div>
+                            ${transformArrays(data.fill_report_statu, data.exactly_item.length ? ['国抽缺少项目:', ...data.exactly_item] : [], data.item_exactly_standard).filter(Boolean).join("<br/>")}
+                        </div>
+                    </div>`,
+                    type: 3,
+                    closeTime: 0
                 })
             } else if (data.item_inconsistent_messages.length) {
                 addNotification({
-                    message: message,
+                    message: () => `<div>
+                    <p>
+                        抽样单编号为${data.samplingNO}的警告提示:
+                    </p>
+                    <div>
+                        ${data.item_inconsistent_messages.filter(Boolean).join("<br/>")}
+                    </div>
+                </div>`,
                     type: 2
                 })
             } else {
-                addNotification({
-                    message: message,
-                    type: 4
-                })
+                const type = data.fillstate === 1 ? 1 : 3
+                const options = {
+                    message: `抽样单编号为${data.samplingNO}${data.message}`,
+                    type: type,
+                }
+                if (type === 3) {
+                    options.closeTime = 0
+                }
+                addNotification(options)
             }
         } else {
             addNotification({

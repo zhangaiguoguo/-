@@ -91,7 +91,7 @@ export function sendMessage(message, callback, errorCallback) {
 const dataMps = new Map()
 
 export function createDataMp(id) {
-    const info = dataMps.set(id, {
+    const info = {
 
         info: null,/*数据详情 {}*/
 
@@ -99,60 +99,36 @@ export function createDataMp(id) {
 
         allItems: null,/*数据项目2 [{},{},...]*/
 
-        overXMLNum: 0,
-
         id: id
-    }).get(id)
+    }
     return {
-        async addOverXMLNum(v) {
-            const cs = (info.overXMLNum++) + 1
-            let flag = true
-            switch (v) {
-                case 1:
-                    {
-                        try {
-                            const requestOptions = getSendHeaders(url1)
-                            const formData = new URLSearchParams();
-                            formData.append('_search', 'true');
-                            formData.append('rows', '2147483647');
-                            formData.append('page', '1');
-                            formData.append('_blChild', 'true');
-                            formData.append('fixRows', 'true');
-                            formData.append('treeGrid', 'false');
-                            formData.append('settingRowNum', '99999');
-                            formData.append('pars', encodeURIComponent(JSON.stringify({
-                                "sys_view_id": "",
-                                "p_TaskID": id,
-                                "_sys_ModelHasChanged": true
-                            })));
-                            const fetchOptions = {
-                                ...requestOptions,
-                                body: formData
-                            }
-                            const response = await Promise.all([fetch(`${url1}?${url1Key}=${prems[0]}`, fetchOptions).then(res => res.json()), fetch(`${url1}?${url1Key}=${prems[1]}`, fetchOptions).then(res => res.json())])
-                            info.items = response[0]
-                            info.allItems = response[1]
-                        } catch (err) {
-                            flag = false
-                        }
-                    }
-                    break
-                case 2:
-                    {
-                        try {
-                            info.info = eval5.evaluate((await fetch(`${url2}${url2Query}` + id).then(res => res.text())))
-                        } catch (err) {
-                            flag = false
-                        }
-                    }
-                    break
-            }
-            if (cs >= 2) {
-                if (flag) {
-                    sendMessage({ type: "RESPONSECOMPLETE", message: info })
-                } else {
-                    sendMessage({ type: "RESPONSECOMPLETEERROR", message: "获取数据异常，请重新操作" })
+        async addOverXMLNum() {
+            try {
+                const requestOptions = getSendHeaders(url1)
+                const formData = new URLSearchParams();
+                formData.append('_search', 'true');
+                formData.append('rows', '2147483647');
+                formData.append('page', '1');
+                formData.append('_blChild', 'true');
+                formData.append('fixRows', 'true');
+                formData.append('treeGrid', 'false');
+                formData.append('settingRowNum', '99999');
+                formData.append('pars', encodeURIComponent(JSON.stringify({
+                    "sys_view_id": "",
+                    "p_TaskID": id,
+                    "_sys_ModelHasChanged": true
+                })));
+                const fetchOptions = {
+                    ...requestOptions,
+                    body: formData
                 }
+                const response = await Promise.all([fetch(`${url1}?${url1Key}=${prems[0]}`, fetchOptions).then(res => res.json()), fetch(`${url1}?${url1Key}=${prems[1]}`, fetchOptions).then(res => res.json()), fetch(`${url2}${url2Query}` + id).then(res => res.text())])
+                info.items = response[0]
+                info.allItems = response[1]
+                info.info = eval5.evaluate(response[2])
+                sendMessage({ type: "RESPONSECOMPLETE", message: info })
+            } catch (err) {
+                sendMessage({ type: "RESPONSECOMPLETEERROR", message: "获取数据异常，请重新操作" })
             }
         }, info
     }

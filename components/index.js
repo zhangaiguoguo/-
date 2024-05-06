@@ -142,7 +142,7 @@ function getLoginInfo() {
     try {
         return unzip(getCookie('loginInfo'))
     } catch (e) { }
-    return {}
+    return null
 }
 
 function setLoginInfo(account, password, token) {
@@ -264,6 +264,9 @@ function observerNode(obsTreeStr, callback) {
 const keys = ['TastConclusion', 'TestBasis']
 
 async function nationalPumpPush(currentSampleID) {
+    // if(!getLoginInfo()){
+    //     return loginAlterHandler()
+    // }
     globalState.currentDataIsPushGC.value = false
     if (!trCurrentDataMps.has(currentSampleID)) {
         return pushStatusErrorTip.value = "数据获取异常，无法推送"
@@ -273,7 +276,6 @@ async function nationalPumpPush(currentSampleID) {
         return getLoginStatus()
     }
     const row = trCurrentDataMps.get(currentSampleID)
-
 
     let is12BFlag = ""
     if (row.info.TaskConclusion1 !== "合格") {
@@ -288,9 +290,9 @@ async function nationalPumpPush(currentSampleID) {
     const dones = [is12BFlag, (row.info[keys[1]] || "").indexOf("Q/") !== -1];
     globalState.currentSampleFlag.value = dones
     if (dones[0]) {
-        tastConclusionMaskLayer()
+        tastConclusionMaskLayer({id:currentSampleID})
     } else if (dones[1]) {
-        createUpLoadFileNode()
+        createUpLoadFileNode({id:currentSampleID})
     }
 
     if (!dones.some(ii => !!ii === true)) {
@@ -442,4 +444,12 @@ function createBlobUrl(base64Data, contentType) {
     const blob = base64ToBlob(base64Data, contentType);
     const blobUrl = URL.createObjectURL(blob);
     return blobUrl;
+}
+
+function transformArray(target) {
+    return Array.isArray(target) ? target : [target]
+}
+
+function transformArrays(...target) {
+    return target.map((i) => transformArray(i)).flat()
 }

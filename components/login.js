@@ -4,6 +4,8 @@
     window.components.push({
         name: "login",
         render(props, emits) {
+            const [account] = useState(ref(""))
+            const [password] = useState(ref(""))
             const html = (htmlProxy = $(findComponentTemplate('maskLayer')({}, {
                 default: () => $(`
                 <div class="login-box-hij">
@@ -20,13 +22,13 @@
                     <div class="form-group el-form-item">
                         <div class="el-form-item_content">
                             <input required type="text" class="form-control el-input w-100" id="account"
-                                name="account" placeholder="请输入账号"  value=${props.account || ""}>
+                                name="account" placeholder="请输入账号"  value=${account.value || ""}>
                         </div>
                     </div>
                     <div class="form-group el-form-item el-form-item-password-cj-r">
                         <div class="el-form-item_content">
                             <input required type="password" class="form-control el-input w-100" id="password"
-                                name="password" placeholder="请输入密码" value=${props.password || ""}>
+                                name="password" placeholder="请输入密码" value=${password.value || ""}>
                                 ${findIconHandlerTemplate('View')()}
                         </div>
                     </div>
@@ -59,9 +61,16 @@
                     immediate: true
                 })
             }, [])
+            html.find(".el-form-item>.el-form-item_content input").on('input', ({ target }) => {
+                if (target.id === "password") {
+                    password.value = target.value
+                } else if (target.id === "account") {
+                    account.value = target.value
+                }
+            })
             html.find("button#login-btn").click(function (evt) {
                 currentLoginStatusErrorTip.value = null
-                loginHandler(html, evt, emits)
+                loginHandler(html, evt, emits, account, password)
             })
             html.find("a.login-close-btn").click(() => {
                 emits.destroy()
@@ -82,7 +91,7 @@
         }
     })
 
-    function loginHandler(html, evt, emits) {
+    function loginHandler(html, evt, emits, account, password) {
         let flag = true
         const formData = new FormData(html.find("form#login-form-options")[0])
         for (let w of formData) {
@@ -108,6 +117,8 @@
                     }
                 })
                 setLoginInfo(formData.get('account'), formData.get('password'))
+                account.value = ""
+                password.value = ""
             } else {
                 emits.destroy()
                 pushStatusErrorTip.value = "操作异常，未获取到当前数据的信息，请重新操作一下"

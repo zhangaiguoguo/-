@@ -32,9 +32,7 @@ function createSocker(name) {
 
         socker.onmessage = function ({ data }) {
             sendMessage({
-                type: "SOCKERRESPONSE", message: {
-                    code: 200, data: data
-                }
+                type: "SOCKERRESPONSE", message: data
             })
         }
     })
@@ -207,24 +205,10 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
 );
 
 
-let currentDataId = null
-
 function setCurrentDataId(id) {
 
     const { addOverXMLNum } = createDataMp(id)
-
-    currentDataId = id
-
-    for (let w of [url1, url2]) {
-        createCurrentDataTask(() => {
-            if (sendHeadersHas(w)) {
-                addOverXMLNum(w === url1 ? 1 : 2)
-                return true
-            }
-        })
-    }
-    runCurrentDataTask()
-    autoGenerateXmlHeader(0)
+    addOverXMLNum()
 }
 
 const currentWindowUrls = ["http://127.0.0.1:5500", "http://192.168.0.28"]
