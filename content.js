@@ -128,7 +128,8 @@ function setTriggerCount() {
 watch(currentId, v => {
     releaseEffect()
     if (v) {
-        obsDOMTrMps2.value = observerNode(`div.taskMain div#LIMSTestReportApproveDetail div.childDiv>table#${'tb4a034014-5582-8b59-bc71-4e74cf4ae623'}>tbody`, function (v) {
+        obsDOMTrMps2.value = observerNode(`div.taskMain div div.childDiv>table#${'tb4a034014-5582-8b59-bc71-4e74cf4ae623'}>tbody`, function (v) {
+            releaseEffect()
             const tds = v.find('td>span')
             currentCYDNumber.value = findtdsValue2(tds, "抽样单号：")
             {
