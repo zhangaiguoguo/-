@@ -408,7 +408,8 @@ function pushCurrentData(status = 1, options = {}) {
                 limittimeFile: options.limittimeFile,
                 enterpriseStandardName: options.enterpriseStandardName,
                 processId: toValue(globalState.currentUuid),
-                nickname: getLoginInfo()?.account
+                nickname: getLoginInfo()?.account,
+                id:id
             }
         })
     } else {

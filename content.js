@@ -46,7 +46,7 @@ const createUpLoadFileNode = createComponent($(document.body), function (props) 
                 files: fileUrls,
                 limittimeFile: fileUrls2,
                 enterpriseStandardName: options.enterpriseStandardName,
-                id:props.id
+                id: props.id
             })
             pushStatusLoading.value = false
             props.destroy()
@@ -100,7 +100,7 @@ async function triggerSampleData(v) {
         return
     }
     const currentSampleId = $(v).attr('id')
-    if (currentId.value && currentId.value !== currentSampleId) {
+    if (currentId.value && currentId.value !== currentSampleId && !alreadyPushedData.has(toValue(currentId))) {
         await new Promise((resolve) => {
             closeDislogHandle2(resolve)
         })
@@ -340,6 +340,10 @@ const ResponseStatus = {
     PUSHSTATUSRESPONSE(message) {
         pushStatusLoading.value = false
         if (message.code === 200) {
+            const row = trCurrentDataMps.get(message.id) || {}
+            addNotification({
+                message: `抽样单编号为${row.info?.SamplingNO}的数据推送成功，后台处理中...`
+            })
             if (message.data.status) {
                 return
             }

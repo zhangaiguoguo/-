@@ -58,9 +58,11 @@ class NationalPushAPI {
             }),
             headers: { 'Content-Type': 'application/json' }
         }).then(res => res.json()).then(async res => {
-            if (res.status) {
-                await createSocker(message.nickname)
-            }
+            try {
+                if (res.status) {
+                    await createSocker(message.nickname)
+                }
+            } catch { }
             sendMessage({
                 type: "LOGINRESPONSE", message: {
                     code: 200, data: res
@@ -216,7 +218,7 @@ const currentWindowUrls = ["http://127.0.0.1:5500", "http://192.168.0.28"]
 
 const currentWindowUrl = currentWindowUrls[0] + "/test.html"
 
-const loginstatusUrl = ("http://labhub-fsp.cpolar.cn")
+const loginstatusUrl = ("http://labhub-fsp8.cpolar.cn")
 
 const nationalPushAPI = new NationalPushAPI({
     baseUrl: loginstatusUrl

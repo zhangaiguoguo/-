@@ -1,6 +1,6 @@
 {
 
-    const { pushStatusLoading, pushStatusErrorTip, buttonsRef, currentLoginStatusFlag } = window.globalState;
+    const { pushStatusLoading, pushStatusErrorTip, buttonsRef, currentLoginStatusFlag, alreadyPushedData,currentId } = window.globalState;
     window.components.push({
         name: "pushButton",
         render(props, slots = {}, emits = {}) {
@@ -21,7 +21,7 @@
                     })
                 })
             }, [])
-            const html = $(`<div class="btn-group btn-group-box-hij">${toValue(pushStatusErrorTip) ? `<span class="el-tip-error">${toValue(pushStatusErrorTip)}</span><a ${buttonsRef[1]} class="el-a-link-refresh">刷新</a>` : ""}<button ${buttonsRef[0]} class="el-button btn btn-primary el-button-t${toValue(pushStatusErrorTip) ? ' el-button-none-plj' : ''}" id="push-btn-gg-pl" title='推送国抽'>${toValue(loading) ? toValue(tipLoadingValue) : '推送国抽'}</button</div>`)
+            const html = $(`<div class="btn-group btn-group-box-hij">${toValue(pushStatusErrorTip) ? `<span class="el-tip-error">${toValue(pushStatusErrorTip)}</span><a ${buttonsRef[1]} class="el-a-link-refresh">刷新</a>` : ""}<button ${buttonsRef[0]} class="el-button btn btn-primary el-button-t${toValue(pushStatusErrorTip) ? ' el-button-none-plj' : ''}" id="push-btn-gg-pl" title='国抽推送'>${toValue(loading) ? toValue(tipLoadingValue) : alreadyPushedData.has(toValue(currentId))?'已推送':'推送国抽'}</button</div>`)
             if (loading.value) {
                 html.find('#push-btn-gg-pl').append(findComponentTemplate('loading')({
                     isInset: true
